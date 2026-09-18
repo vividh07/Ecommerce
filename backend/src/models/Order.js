@@ -21,6 +21,10 @@ const orderItemSchema = new mongoose.Schema(
     lineTotal: { type: Number, required: true, min: 0 },
     productName: { type: String, required: true },
     variantLabel: { type: String, default: '' },
+    deliveredAt: { type: Date, default: null },
+    returnDeadline: { type: Date, default: null },
+    warrantyExpiry: { type: Date, default: null },
+    replacementEligible: { type: Boolean, default: false },
   },
   { _id: false }
 );
@@ -69,6 +73,8 @@ const orderSchema = new mongoose.Schema(
     couponCode: { type: String, default: null },
     couponId: { type: mongoose.Schema.Types.ObjectId, ref: 'Coupon', default: null },
     totalAmount: { type: Number, required: true, min: 0 },
+    deliveredAt: { type: Date, default: null },
+    returnWindowDays: { type: Number, default: 30 },
     isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true }

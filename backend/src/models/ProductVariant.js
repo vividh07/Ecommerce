@@ -11,6 +11,8 @@ const productVariantSchema = new mongoose.Schema(
     price: { type: Number, required: true, min: 0 },
     stock: { type: Number, required: true, min: 0, default: 0 },
     sku: { type: String, required: true, trim: true },
+    warrantyMonths: { type: Number, default: 12, min: 0 },
+    replacementEligible: { type: Boolean, default: true },
   },
   { timestamps: true }
 );

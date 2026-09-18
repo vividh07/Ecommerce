@@ -71,7 +71,7 @@ Set `STRIPE_WEBHOOK_SECRET` from the CLI output. Payment success webhooks finali
 
 **Phase 2** adds wishlist, coupons at checkout, order tracking with status history and Socket.io updates, named multi-carts with budgets, and cart duplicate/compare.
 
-**Phase 3** (planned): Shopping Room and post-purchase dashboard.
+**Phase 3** adds real-time Shopping Rooms (Socket.io) and the post-purchase dashboard (`/dashboard`).
 
 ## Deployment
 

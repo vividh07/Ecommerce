@@ -44,7 +44,7 @@ export function HomePage() {
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link to="/browse" className="btn-primary">Explore catalog</Link>
-            <Link to="/register" className="btn-ghost">Open a store</Link>
+            <Link to="/shopping-room" className="btn-ghost">Shopping Room</Link>
           </div>
         </motion.div>
         <div className="pointer-events-none absolute -right-20 top-0 h-64 w-64 rounded-full bg-accent/20 blur-3xl" />

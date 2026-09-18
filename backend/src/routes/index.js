@@ -10,6 +10,8 @@ import orderRoutes from './orderRoutes.js';
 import reviewRoutes from './reviewRoutes.js';
 import sellerRoutes from './sellerRoutes.js';
 import adminRoutes from './adminRoutes.js';
+import shoppingRoomRoutes from './shoppingRoomRoutes.js';
+import dashboardRoutes from './dashboardRoutes.js';
 
 const router = Router();
 
@@ -24,5 +26,7 @@ router.use('/orders', orderRoutes);
 router.use('/reviews', reviewRoutes);
 router.use('/sellers', sellerRoutes);
 router.use('/admin', adminRoutes);
+router.use('/shopping-rooms', shoppingRoomRoutes);
+router.use('/dashboard', dashboardRoutes);
 
 export default router;

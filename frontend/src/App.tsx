@@ -18,6 +18,9 @@ import { OrdersPage } from './pages/OrdersPage';
 import { LoginPage, RegisterPage } from './pages/AuthPages';
 import { SellerDashboardPage } from './pages/SellerDashboardPage';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
+import { ShoppingRoomLobbyPage } from './pages/ShoppingRoomLobbyPage';
+import { ShoppingRoomPage } from './pages/ShoppingRoomPage';
+import { PostPurchaseDashboardPage } from './pages/PostPurchaseDashboardPage';
 
 export default function App() {
   return (
@@ -42,6 +45,9 @@ export default function App() {
               <Route path="product/:productId" element={<ProductDetailPage />} />
               <Route path="login" element={<LoginPage />} />
               <Route path="register" element={<RegisterPage />} />
+              <Route path="shopping-room" element={<RequireAuth><ShoppingRoomLobbyPage /></RequireAuth>} />
+              <Route path="room/:roomCode" element={<RequireAuth><ShoppingRoomPage /></RequireAuth>} />
+              <Route path="dashboard" element={<RequireAuth><PostPurchaseDashboardPage /></RequireAuth>} />
               <Route path="wishlist" element={<RequireAuth><WishlistPage /></RequireAuth>} />
               <Route path="cart" element={<RequireAuth><CartPage /></RequireAuth>} />
               <Route path="cart/compare" element={<RequireAuth><CartComparePage /></RequireAuth>} />

@@ -2,6 +2,7 @@ import { Server } from 'socket.io';
 import { env } from '../config/env.js';
 import { verifyAccessToken } from '../utils/jwt.js';
 import { setIo } from './io.js';
+import { registerShoppingRoomSocket } from './shoppingRoomSocket.js';
 
 export function initSocket(httpServer) {
   const io = new Server(httpServer, {
@@ -23,9 +24,10 @@ export function initSocket(httpServer) {
     }
   });
 
+  registerShoppingRoomSocket(io);
+
   io.on('connection', (socket) => {
     socket.join(`user:${socket.userId}`);
-    socket.on('disconnect', () => {});
   });
 
   setIo(io);

@@ -21,6 +21,8 @@ export function Shell() {
             <NavLink to="/browse" className={navLinkClass}>Browse</NavLink>
             {user && (
               <>
+                <NavLink to="/shopping-room" className={navLinkClass}>Shopping Room</NavLink>
+                <NavLink to="/dashboard" className={navLinkClass}>Dashboard</NavLink>
                 <NavLink to="/wishlist" className={navLinkClass}>Wishlist</NavLink>
                 <NavLink to="/orders" className={navLinkClass}>Orders</NavLink>
                 {(user.role === 'SELLER' || user.role === 'ADMIN') && (

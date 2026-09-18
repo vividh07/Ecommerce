@@ -4,6 +4,7 @@ import { orderStatusHistoryRepository } from '../repositories/orderStatusHistory
 import { sellerRepository } from '../repositories/sellerRepository.js';
 import { aggregateOrderStatus, canAdvanceStatus } from '../utils/orderStatus.js';
 import { getIo } from '../socket/io.js';
+import { applyItemPostPurchaseFields } from '../utils/postPurchase.js';
 
 async function logStatus(orderId, status, note, sellerId = null, session) {
   return orderStatusHistoryRepository.add(
@@ -68,6 +69,9 @@ export const orderTrackingService = {
     entry.status = status;
     const statuses = order.sellerFulfillment.map((f) => f.status);
     order.status = aggregateOrderStatus(statuses, order.status);
+    if (order.status === 'DELIVERED' && !order.deliveredAt) {
+      await applyItemPostPurchaseFields(order);
+    }
     await order.save();
 
     await logStatus(
