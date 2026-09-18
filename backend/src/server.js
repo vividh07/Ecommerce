@@ -1,7 +1,9 @@
+import http from 'http';
 import { createApp } from './app.js';
 import { connectDb } from './config/db.js';
 import { env } from './config/env.js';
 import { seedIfEmpty } from './scripts/seedData.js';
+import { initSocket } from './socket/index.js';
 
 async function start() {
   await connectDb();
@@ -9,7 +11,9 @@ async function start() {
     await seedIfEmpty();
   }
   const app = createApp();
-  app.listen(env.PORT, () => {
+  const server = http.createServer(app);
+  initSocket(server);
+  server.listen(env.PORT, () => {
     console.log(`API listening on port ${env.PORT}`);
   });
 }

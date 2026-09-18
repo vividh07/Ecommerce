@@ -69,7 +69,9 @@ Set `STRIPE_WEBHOOK_SECRET` from the CLI output. Payment success webhooks finali
 
 ## Phase scope
 
-Phase 1 includes core catalog, cart, Stripe checkout, orders, reviews, and basic multi-vendor. Wishlist, coupons, advanced tracking, and unique features (Shopping Room, multi-cart, etc.) are planned for later phases.
+**Phase 2** adds wishlist, coupons at checkout, order tracking with status history and Socket.io updates, named multi-carts with budgets, and cart duplicate/compare.
+
+**Phase 3** (planned): Shopping Room and post-purchase dashboard.
 
 ## Deployment
 

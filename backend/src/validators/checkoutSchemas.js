@@ -13,4 +13,6 @@ export const shippingAddressSchema = z.object({
 
 export const checkoutCreateSchema = z.object({
   shippingAddress: shippingAddressSchema,
+  cartId: z.string().optional(),
+  couponCode: z.string().trim().optional(),
 });

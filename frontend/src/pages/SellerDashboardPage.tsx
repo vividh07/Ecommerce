@@ -18,6 +18,15 @@ export function SellerDashboardPage() {
     images: '',
   });
   const [categories, setCategories] = useState<{ _id: string; name: string }[]>([]);
+  const [coupons, setCoupons] = useState<any[]>([]);
+  const [couponForm, setCouponForm] = useState({
+    code: '',
+    type: 'PERCENTAGE',
+    value: '10',
+    minOrderValue: '0',
+    expiryDate: '',
+    usageLimit: '100',
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,7 +40,8 @@ export function SellerDashboardPage() {
     if (seller?.isApproved) {
       tasks.push(
         api.get('/products/mine').then((res) => setProducts(res.data.items ?? [])),
-        api.get('/orders/seller/mine').then((res) => setOrders(res.data.items ?? []))
+        api.get('/orders/seller/mine').then((res) => setOrders(res.data.items ?? [])),
+        api.get('/coupons/seller').then((res) => setCoupons(res.data.items ?? []))
       );
     }
     Promise.all(tasks).finally(() => setLoading(false));
@@ -137,20 +147,85 @@ export function SellerDashboardPage() {
         </ul>
       </section>
 
+      <section className="glass rounded-2xl p-6">
+        <h2 className="font-display text-xl font-semibold">Store coupons</h2>
+        <form
+          className="mt-4 grid gap-2 md:grid-cols-3"
+          onSubmit={async (e) => {
+            e.preventDefault();
+            try {
+              await api.post('/coupons/seller', {
+                code: couponForm.code,
+                type: couponForm.type,
+                value: Number(couponForm.value),
+                minOrderValue: Number(couponForm.minOrderValue),
+                expiryDate: couponForm.expiryDate,
+                usageLimit: Number(couponForm.usageLimit),
+              });
+              toast.success('Coupon created');
+              const res = await api.get('/coupons/seller');
+              setCoupons(res.data.items ?? []);
+            } catch (err: any) {
+              toast.error(err.response?.data?.message ?? 'Failed');
+            }
+          }}
+        >
+          <input className="input-field" placeholder="Code" required value={couponForm.code} onChange={(e) => setCouponForm({ ...couponForm, code: e.target.value })} />
+          <select className="input-field" value={couponForm.type} onChange={(e) => setCouponForm({ ...couponForm, type: e.target.value })}>
+            <option value="PERCENTAGE">Percentage</option>
+            <option value="FIXED">Fixed</option>
+          </select>
+          <input className="input-field" type="number" placeholder="Value" value={couponForm.value} onChange={(e) => setCouponForm({ ...couponForm, value: e.target.value })} />
+          <input className="input-field" type="date" required value={couponForm.expiryDate} onChange={(e) => setCouponForm({ ...couponForm, expiryDate: e.target.value })} />
+          <button type="submit" className="btn-primary md:col-span-2">Create coupon</button>
+        </form>
+        <ul className="mt-4 space-y-2 text-sm">
+          {coupons.map((c) => (
+            <li key={c._id} className="flex justify-between rounded-xl bg-white/5 px-3 py-2">
+              <span>{c.code} · {c.type} {c.value}</span>
+              <span className="text-muted">{c.timesUsed} used</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
       <section>
         <h2 className="font-display text-xl font-semibold">Orders</h2>
         {orders.length === 0 ? (
           <p className="mt-2 text-muted">No orders yet.</p>
         ) : (
           <ul className="mt-4 space-y-3">
-            {orders.map((o) => (
+            {orders.map((o: any) => (
               <li key={o._id} className="glass rounded-xl p-4 text-sm">
                 <p className="font-medium">Order #{o._id.slice(-6)} — ${o.totalAmount.toFixed(2)}</p>
+                <p className="text-muted">Your status: {o.myFulfillment?.status ?? o.status}</p>
                 <ul className="mt-1 text-muted">
-                  {o.items.map((item, i) => (
+                  {o.items.map((item: any, i: number) => (
                     <li key={i}>{item.productName} × {item.quantity}</li>
                   ))}
                 </ul>
+                <select
+                  className="input-field mt-3"
+                  defaultValue=""
+                  onChange={async (e) => {
+                    const status = e.target.value;
+                    if (!status) return;
+                    try {
+                      await api.patch(`/orders/seller/${o._id}/status`, { status });
+                      toast.success('Status updated');
+                      const res = await api.get('/orders/seller/mine');
+                      setOrders(res.data.items ?? []);
+                    } catch (err: any) {
+                      toast.error(err.response?.data?.message ?? 'Update failed');
+                    }
+                    e.target.value = '';
+                  }}
+                >
+                  <option value="">Update fulfillment…</option>
+                  <option value="SHIPPED">Shipped</option>
+                  <option value="OUT_FOR_DELIVERY">Out for delivery</option>
+                  <option value="DELIVERED">Delivered</option>
+                </select>
               </li>
             ))}
           </ul>

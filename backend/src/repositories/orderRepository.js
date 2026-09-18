@@ -32,9 +32,12 @@ export const orderRepository = {
   async markPaid(orderId, session) {
     return Order.findByIdAndUpdate(
       orderId,
-      { paymentStatus: 'PAID', status: 'PLACED' },
+      { paymentStatus: 'PAID' },
       { new: true, session }
     );
+  },
+  async updateStatus(orderId, status, session) {
+    return Order.findByIdAndUpdate(orderId, { status }, { new: true, session });
   },
   async updatePaymentStatusByIntent(paymentIntentId, paymentStatus, session) {
     return Order.findOneAndUpdate(

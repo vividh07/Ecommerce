@@ -41,8 +41,8 @@ export function OrdersPage() {
                   <li key={idx}>{item.productName} × {item.quantity}</li>
                 ))}
               </ul>
-              <Link to={`/orders/confirmation/${o._id}`} className="mt-3 inline-block text-sm text-accent hover:underline">
-                Details
+              <Link to={`/orders/${o._id}`} className="mt-3 inline-block text-sm text-accent hover:underline">
+                Track order
               </Link>
             </li>
           ))}

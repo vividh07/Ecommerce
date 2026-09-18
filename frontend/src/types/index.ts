@@ -59,14 +59,38 @@ export type CartItem = {
 
 export type Cart = {
   id: string;
+  name: string;
+  budget: number | null;
+  budgetUsedPercent: number | null;
+  overBudget: boolean;
   items: CartItem[];
   subtotal: number;
 };
 
+export type OrderStatus =
+  | 'PLACED'
+  | 'CONFIRMED'
+  | 'SHIPPED'
+  | 'OUT_FOR_DELIVERY'
+  | 'DELIVERED'
+  | 'CANCELLED'
+  | 'RETURNED';
+
+export type StatusHistoryEntry = {
+  _id: string;
+  status: OrderStatus;
+  timestamp: string;
+  note: string;
+  sellerId?: string;
+};
+
 export type Order = {
   _id: string;
-  status: string;
+  status: OrderStatus;
   paymentStatus: string;
+  subtotalAmount: number;
+  discountAmount?: number;
+  couponCode?: string | null;
   totalAmount: number;
   createdAt: string;
   sellerBreakdown: Array<{
@@ -75,11 +99,17 @@ export type Order = {
     subtotal: number;
     itemCount: number;
   }>;
+  sellerFulfillment?: Array<{
+    sellerId: string;
+    storeName: string;
+    status: OrderStatus;
+  }>;
   items: Array<{
     productName: string;
     variantLabel: string;
     quantity: number;
     lineTotal: number;
+    sellerId?: string;
   }>;
   shippingAddress: {
     fullName: string;
@@ -97,4 +127,16 @@ export type Review = {
   comment: string;
   createdAt: string;
   userId: { name: string };
+};
+
+export type Coupon = {
+  _id: string;
+  code: string;
+  type: 'PERCENTAGE' | 'FIXED';
+  value: number;
+  minOrderValue: number;
+  expiryDate: string;
+  usageLimit?: number | null;
+  timesUsed: number;
+  isActive: boolean;
 };

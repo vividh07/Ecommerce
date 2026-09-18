@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
+import { WishlistProvider } from './context/WishlistContext';
 import { Shell } from './components/layout/Shell';
 import { RequireAuth } from './components/auth/RequireAuth';
 import { HomePage } from './pages/HomePage';
@@ -10,6 +11,9 @@ import { ProductDetailPage } from './pages/ProductDetailPage';
 import { CartPage } from './pages/CartPage';
 import { CheckoutPage } from './pages/CheckoutPage';
 import { OrderConfirmationPage } from './pages/OrderConfirmationPage';
+import { OrderDetailPage } from './pages/OrderDetailPage';
+import { WishlistPage } from './pages/WishlistPage';
+import { CartComparePage } from './pages/CartComparePage';
 import { OrdersPage } from './pages/OrdersPage';
 import { LoginPage, RegisterPage } from './pages/AuthPages';
 import { SellerDashboardPage } from './pages/SellerDashboardPage';
@@ -20,6 +24,7 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <CartProvider>
+          <WishlistProvider>
           <Toaster
             position="bottom-right"
             toastOptions={{
@@ -37,15 +42,19 @@ export default function App() {
               <Route path="product/:productId" element={<ProductDetailPage />} />
               <Route path="login" element={<LoginPage />} />
               <Route path="register" element={<RegisterPage />} />
+              <Route path="wishlist" element={<RequireAuth><WishlistPage /></RequireAuth>} />
               <Route path="cart" element={<RequireAuth><CartPage /></RequireAuth>} />
+              <Route path="cart/compare" element={<RequireAuth><CartComparePage /></RequireAuth>} />
               <Route path="checkout" element={<RequireAuth><CheckoutPage /></RequireAuth>} />
               <Route path="orders" element={<RequireAuth><OrdersPage /></RequireAuth>} />
               <Route path="orders/confirmation/:orderId" element={<RequireAuth><OrderConfirmationPage /></RequireAuth>} />
+              <Route path="orders/:orderId" element={<RequireAuth><OrderDetailPage /></RequireAuth>} />
               <Route path="seller" element={<RequireAuth><SellerDashboardPage /></RequireAuth>} />
               <Route path="admin" element={<RequireAuth><AdminDashboardPage /></RequireAuth>} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
           </Routes>
+          </WishlistProvider>
         </CartProvider>
       </AuthProvider>
     </BrowserRouter>

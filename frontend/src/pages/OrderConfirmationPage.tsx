@@ -11,7 +11,7 @@ export function OrderConfirmationPage() {
 
   useEffect(() => {
     if (!orderId) return;
-    api.get(`/orders/${orderId}`).then((res) => setOrder(res.data.data));
+    api.get(`/orders/${orderId}`).then((res) => setOrder(res.data.data.order));
   }, [orderId]);
 
   if (!order) return <Skeleton className="h-48 w-full" />;

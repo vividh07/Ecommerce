@@ -16,17 +16,20 @@ export function AdminDashboardPage() {
   const { user } = useAuth();
   const [pending, setPending] = useState<PendingSeller[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [coupons, setCoupons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   async function load() {
     setLoading(true);
     try {
-      const [sellersRes, productsRes] = await Promise.all([
+      const [sellersRes, productsRes, couponsRes] = await Promise.all([
         api.get('/admin/sellers/pending'),
         api.get('/products/admin/all'),
+        api.get('/coupons/admin'),
       ]);
       setPending(sellersRes.data.items ?? []);
       setProducts(productsRes.data.items ?? []);
+      setCoupons(couponsRes.data.items ?? []);
     } finally {
       setLoading(false);
     }
@@ -85,6 +88,19 @@ export function AdminDashboardPage() {
             ))}
           </ul>
         )}
+      </section>
+
+      <section>
+        <h2 className="font-display text-xl font-semibold">Platform coupons</h2>
+        <ul className="mt-4 space-y-2 text-sm">
+          {coupons.filter((c) => !c.sellerId).map((c) => (
+            <li key={c._id} className="glass flex items-center justify-between rounded-xl p-4">
+              <span className="font-medium">{c.code}</span>
+              <span className="text-muted">{c.type} {c.value} · {c.isActive ? 'Active' : 'Off'}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-2 text-xs text-muted">Demo code from seed: SAVE10 (10% off $50+)</p>
       </section>
 
       <section>

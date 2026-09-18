@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { api } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
 import { Skeleton } from '../components/ui/Skeleton';
 import type { ProductVariant, Review } from '../types';
 
@@ -12,6 +13,7 @@ export function ProductDetailPage() {
   const { productId } = useParams();
   const { user } = useAuth();
   const { addItem } = useCart();
+  const { isWishlisted, toggle } = useWishlist();
   const [loading, setLoading] = useState(true);
   const [product, setProduct] = useState<any>(null);
   const [variants, setVariants] = useState<ProductVariant[]>([]);
@@ -99,7 +101,25 @@ export function ProductDetailPage() {
       </motion.div>
       <div>
         <p className="text-sm text-accent">{stats.count ? `★ ${stats.avgRating.toFixed(1)}` : 'No reviews yet'}</p>
-        <h1 className="mt-2 font-display text-4xl font-bold">{product.name}</h1>
+        <div className="mt-2 flex items-start justify-between gap-4">
+          <h1 className="font-display text-4xl font-bold">{product.name}</h1>
+          {user && (
+            <button
+              type="button"
+              className="btn-ghost shrink-0"
+              onClick={async () => {
+                try {
+                  await toggle(productId!);
+                  toast.success(isWishlisted(productId!) ? 'Removed from wishlist' : 'Saved to wishlist');
+                } catch {
+                  toast.error('Sign in to save items');
+                }
+              }}
+            >
+              {isWishlisted(productId!) ? '♥ Saved' : '♡ Wishlist'}
+            </button>
+          )}
+        </div>
         <p className="mt-4 text-muted">{product.description}</p>
         <p className="mt-6 text-3xl font-semibold text-accent">
           ${(variant?.price ?? product.basePrice).toFixed(2)}

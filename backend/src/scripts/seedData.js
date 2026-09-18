@@ -4,6 +4,7 @@ import { Seller } from '../models/Seller.js';
 import { Category } from '../models/Category.js';
 import { Product } from '../models/Product.js';
 import { ProductVariant } from '../models/ProductVariant.js';
+import { Coupon } from '../models/Coupon.js';
 
 export async function seedIfEmpty() {
   const count = await User.countDocuments();
@@ -90,6 +91,18 @@ export async function seedIfEmpty() {
     },
   ]);
 
-  console.log('Seeded demo catalog (admin@demo.shop / Password123!)');
+  const expiry = new Date();
+  expiry.setFullYear(expiry.getFullYear() + 1);
+  await Coupon.create({
+    code: 'SAVE10',
+    type: 'PERCENTAGE',
+    value: 10,
+    minOrderValue: 50,
+    expiryDate: expiry,
+    usageLimit: 1000,
+    isActive: true,
+  });
+
+  console.log('Seeded demo catalog (admin@demo.shop / Password123!, coupon SAVE10)');
   return true;
 }
