@@ -20,15 +20,18 @@ export function AuthLayout({
   return (
     <div className="min-h-screen bg-bg">
       <ShopNavbar />
-      <div className="grid min-h-[calc(100vh-73px)] lg:grid-cols-2">
+      <div className="grid min-h-[calc(100vh-72px)] lg:grid-cols-2">
         <div className="relative hidden overflow-hidden border-r border-border lg:block">
-          <img src={HERO} alt="" className="h-full w-full object-cover opacity-90" />
-          <p className="absolute left-8 top-8 eyebrow max-w-[12rem] text-text/80">Good things go further</p>
-          <p className="absolute bottom-8 left-8 eyebrow max-w-[14rem] text-text/80">Curated for a brighter tomorrow</p>
+          <img src={HERO} alt="" className="h-full w-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-bg/80 via-transparent to-bg/30" />
+          <p className="absolute left-8 top-8 eyebrow text-text/90">Good things go further</p>
+          <p className="absolute bottom-10 left-8 max-w-xs text-sm leading-relaxed text-text/80">
+            Curated for a brighter tomorrow
+          </p>
         </div>
-        <div className="flex flex-col justify-center px-6 py-12 md:px-16 lg:px-20">
+        <div className="flex flex-col justify-center px-6 py-14 md:px-16 lg:px-20">
           <p className="eyebrow">{eyebrow}</p>
-          <h1 className="mt-3 font-display text-5xl uppercase leading-none md:text-6xl">{title}</h1>
+          <h1 className="auth-title mt-3">{title}</h1>
           <p className="mt-4 text-muted">{subtitle}</p>
           <div className="mt-8 max-w-md">{children}</div>
           <div className="mt-8 max-w-md text-sm text-muted">{footer}</div>
@@ -55,7 +58,7 @@ export function AuthField({
 }) {
   return (
     <div>
-      <label className="mb-2 block text-sm font-medium">{label}</label>
+      <label className="mb-2 block text-sm font-medium text-text">{label}</label>
       <input
         type={type}
         className="input-field"
@@ -70,7 +73,7 @@ export function AuthField({
 
 export function AuthLink({ to, children }: { to: string; children: React.ReactNode }) {
   return (
-    <Link to={to} className="text-text underline decoration-accent underline-offset-4 hover:text-accent">
+    <Link to={to} className="font-medium text-text underline decoration-accent underline-offset-4 hover:text-accent">
       {children}
     </Link>
   );

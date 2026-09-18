@@ -7,10 +7,12 @@
   --color-bg: #0a0a0a;
   --color-surface: #111111;
   --color-surface-2: #161616;
+  --color-panel: #111111;
+  --color-panel-2: #161616;
   --color-border: rgba(255, 255, 255, 0.1);
   --color-border-strong: rgba(255, 255, 255, 0.18);
-  --color-text: #fafafa;
-  --color-muted: #a3a3a3;
+  --color-text: #ffffff;
+  --color-muted: #9ca3af;
   --color-accent: #d4ff3f;
   --color-accent-fg: #0a0a0a;
   --color-danger: #f87171;
@@ -18,7 +20,7 @@
   --color-success: #4ade80;
 
   --radius-btn: 8px;
-  --radius-card: 8px;
+  --radius-card: 12px;
 }
 
 @layer base {
@@ -28,6 +30,7 @@
   }
 
   body {
+    margin: 0;
     min-height: 100vh;
     background: var(--color-bg);
   }
@@ -40,7 +43,38 @@
   }
 
   .eyebrow {
-    @apply text-[11px] font-medium uppercase tracking-[0.2em] text-muted;
+    @apply text-[11px] font-medium uppercase tracking-[0.22em] text-muted;
+  }
+
+  .wordmark {
+    font-family: var(--font-display);
+    @apply text-[1.35rem] uppercase tracking-[0.42em] text-text;
+  }
+
+  .page-title {
+    font-family: var(--font-display);
+    @apply text-4xl uppercase leading-[0.95] text-text md:text-5xl lg:text-[4.5rem];
+    letter-spacing: 0.04em;
+  }
+
+  .page-title-mixed {
+    @apply text-4xl font-bold leading-tight text-text md:text-5xl;
+    font-family: var(--font-body);
+    text-transform: none;
+    letter-spacing: -0.02em;
+  }
+
+  .auth-title {
+    @apply text-4xl font-bold leading-tight text-text md:text-5xl;
+    letter-spacing: -0.02em;
+  }
+
+  .panel {
+    @apply rounded-[12px] border border-border bg-panel;
+  }
+
+  .card {
+    @apply rounded-[12px] border border-border bg-panel;
   }
 
   .hairline {
@@ -52,7 +86,7 @@
   }
 
   .btn-outline {
-    @apply inline-flex items-center justify-center gap-2 rounded-[8px] border border-border-strong bg-transparent px-5 py-3 text-sm font-medium text-text transition hover:bg-white/5;
+    @apply inline-flex items-center justify-center gap-2 rounded-[8px] border border-border bg-transparent px-5 py-3 text-sm font-medium text-text transition hover:bg-white/5;
   }
 
   .btn-ghost {
@@ -60,21 +94,50 @@
   }
 
   .input-field {
-    @apply w-full rounded-[8px] border border-border bg-surface-2 px-4 py-3 text-sm text-text outline-none transition placeholder:text-muted focus:border-accent/60;
+    @apply w-full rounded-[8px] border border-border bg-panel-2 px-4 py-3 text-sm text-text outline-none transition placeholder:text-muted focus:border-accent/50;
   }
 
-  .card {
-    @apply rounded-[8px] border border-border bg-bg;
+  .input-pill {
+    @apply w-full rounded-full border border-border bg-[#111] py-2.5 pl-10 pr-4 text-[0.8rem] text-text outline-none placeholder:text-gray-500 focus:border-accent/40;
   }
 
-  .page-title {
-    font-family: var(--font-display);
-    @apply text-4xl uppercase leading-none text-text md:text-5xl lg:text-6xl;
-    letter-spacing: 0.03em;
+  .nav-link {
+    @apply text-sm text-muted transition hover:text-text;
   }
 
-  .wordmark {
-    font-family: var(--font-display);
-    @apply text-2xl uppercase tracking-[0.35em] text-text;
+  .nav-link-active {
+    @apply text-text;
+  }
+
+  .product-tile {
+    @apply overflow-hidden rounded-[12px] border border-border bg-panel;
+  }
+
+  .product-tile-image {
+    @apply flex aspect-square items-center justify-center bg-[#1a1a1a];
+  }
+
+  .filter-chip {
+    @apply rounded-full border border-border px-4 py-2 text-sm text-muted transition hover:border-white/20 hover:text-text;
+  }
+
+  .filter-chip-active {
+    @apply border-accent bg-accent/10 text-accent;
+  }
+
+  .qty-control {
+    @apply inline-flex items-center rounded-[8px] border border-border;
+  }
+
+  .qty-control button {
+    @apply px-3 py-2 text-text hover:bg-white/5;
+  }
+
+  .payment-option {
+    @apply flex cursor-pointer items-center justify-between rounded-[8px] border border-border p-4 transition hover:border-white/20;
+  }
+
+  .payment-option-selected {
+    @apply border-accent bg-accent/5;
   }
 }

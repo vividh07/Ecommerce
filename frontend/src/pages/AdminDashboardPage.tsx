@@ -54,7 +54,7 @@ export function AdminDashboardPage() {
       <AdminSidebar />
       <div className="flex-1">
         <header className="flex flex-wrap items-center justify-between gap-4 border-b border-border px-6 py-4">
-          <p className="wordmark text-lg tracking-[0.2em]">Nexus <span className="text-muted">| ADMIN</span></p>
+          <p className="wordmark text-lg tracking-[0.35em]">SHOP <span className="font-body text-sm font-normal tracking-normal text-muted">| ADMIN</span></p>
           <Link to="/admin" className="btn-primary text-sm">+ Add product</Link>
         </header>
         <main className="p-6 md:p-8">

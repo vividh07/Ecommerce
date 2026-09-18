@@ -12,27 +12,40 @@ const links = [
 export function AccountSidebar() {
   const { logout } = useAuth();
   return (
-    <aside className="w-full shrink-0 md:w-56">
+    <aside className="w-full shrink-0 lg:w-[220px]">
       <nav className="space-y-1">
         {links.map((link) => (
           <NavLink
             key={link.to}
             to={link.to}
             className={({ isActive }) =>
-              `relative block rounded-[8px] px-4 py-3 text-sm transition ${
+              `relative block rounded-lg py-3 pl-4 text-sm transition ${
                 isActive
-                  ? 'bg-surface-2 text-text before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:rounded-full before:bg-accent'
-                  : 'text-muted hover:text-text'
+                  ? 'bg-[#141414] text-white before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:rounded-full before:bg-[#d4ff3f]'
+                  : 'text-gray-400 hover:text-white'
               }`
             }
           >
             {link.label}
           </NavLink>
         ))}
-        <button type="button" onClick={() => logout()} className="btn-ghost w-full justify-start px-4 text-left">
+        <button
+          type="button"
+          onClick={() => logout()}
+          className="block w-full rounded-lg py-3 pl-4 text-left text-sm text-gray-400 hover:text-white"
+        >
           Sign out
         </button>
       </nav>
     </aside>
+  );
+}
+
+export function AccountPageLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-10 lg:flex-row lg:gap-14">
+      <AccountSidebar />
+      <div className="min-w-0 flex-1">{children}</div>
+    </div>
   );
 }

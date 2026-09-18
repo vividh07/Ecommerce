@@ -31,7 +31,7 @@ export function RegisterPage() {
 
   return (
     <AuthLayout
-      eyebrow="Join Nexus"
+      eyebrow="Join SHOP"
       title="Your next favorite starts here."
       subtitle="Create an account to get started."
       footer={
