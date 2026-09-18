@@ -1,78 +1,35 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { motion } from 'framer-motion';
 import { api } from '../lib/api';
+import { Breadcrumbs } from '../components/layout/ShopNavbar';
 
 export function ShoppingRoomLobbyPage() {
   const navigate = useNavigate();
-  const [joinCode, setJoinCode] = useState('');
-  const [creating, setCreating] = useState(false);
-
-  async function createRoom() {
-    setCreating(true);
-    try {
-      const res = await api.post('/shopping-rooms');
-      const code = res.data.data.roomCode;
-      toast.success(`Room ${code} created`);
-      navigate(`/room/${code}`);
-    } catch (err: any) {
-      toast.error(err.response?.data?.message ?? 'Could not create room');
-    } finally {
-      setCreating(false);
-    }
-  }
-
-  async function joinRoom(e: React.FormEvent) {
-    e.preventDefault();
-    if (!joinCode.trim()) return;
-    try {
-      await api.post(`/shopping-rooms/${joinCode.trim().toUpperCase()}/join`);
-      navigate(`/room/${joinCode.trim().toUpperCase()}`);
-    } catch (err: any) {
-      toast.error(err.response?.data?.message ?? 'Room not found');
-    }
-  }
+  const [code, setCode] = useState('');
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="glass-strong rounded-3xl p-8 md:p-10"
-      >
-        <p className="text-sm font-medium uppercase tracking-widest text-accent">Live</p>
-        <h1 className="mt-2 font-display text-4xl font-bold">Shopping Room</h1>
-        <p className="mt-3 text-muted">
-          Shortlist and vote on products with friends in real time. Everyone checks out on their own cart.
-        </p>
-        <button
-          type="button"
-          className="btn-primary mt-8 w-full sm:w-auto"
-          disabled={creating}
-          onClick={createRoom}
-        >
-          {creating ? 'Creating…' : 'Start a room'}
-        </button>
-        <form onSubmit={joinRoom} className="mt-10 border-t border-border pt-8">
-          <label className="text-sm text-muted">Have a code?</label>
-          <div className="mt-2 flex gap-2">
-            <input
-              className="input-field flex-1 uppercase"
-              placeholder="e.g. A1B2C3"
-              value={joinCode}
-              onChange={(e) => setJoinCode(e.target.value)}
-            />
-            <button type="submit" className="btn-ghost">Join</button>
-          </div>
-        </form>
-        <p className="mt-6 text-xs text-muted">
-          Share the link: <code className="text-accent">/room/YOUR_CODE</code>
-        </p>
-      </motion.div>
-      <Link to="/dashboard" className="mt-6 inline-block text-sm text-accent hover:underline">
-        Post-purchase dashboard →
-      </Link>
+    <div className="mx-auto max-w-xl">
+      <Breadcrumbs items={[{ label: 'HOME', to: '/browse' }, { label: 'SHOPPING ROOM' }]} />
+      <h1 className="page-title mt-4">Shop together.</h1>
+      <p className="mt-3 text-muted">Create a room, share the code, vote on picks — everyone checks out separately.</p>
+      <button type="button" className="btn-primary mt-8 w-full" onClick={async () => {
+        try {
+          const res = await api.post('/shopping-rooms');
+          navigate(`/room/${res.data.data.roomCode}`);
+        } catch {
+          toast.error('Could not create room');
+        }
+      }}>Start a room</button>
+      <form className="mt-8 flex gap-2" onSubmit={async (e) => {
+        e.preventDefault();
+        await api.post(`/shopping-rooms/${code}/join`);
+        navigate(`/room/${code}`);
+      }}>
+        <input className="input-field uppercase" placeholder="Room code" value={code} onChange={(e) => setCode(e.target.value)} />
+        <button type="submit" className="btn-outline">Join</button>
+      </form>
+      <Link to="/dashboard" className="mt-6 inline-block text-sm text-accent">Post-purchase dashboard →</Link>
     </div>
   );
 }

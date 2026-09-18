@@ -92,6 +92,7 @@ export type Order = {
   discountAmount?: number;
   couponCode?: string | null;
   totalAmount: number;
+  deliveredAt?: string | null;
   createdAt: string;
   sellerBreakdown: Array<{
     sellerId: string;

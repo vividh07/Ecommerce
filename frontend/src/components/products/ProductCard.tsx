@@ -1,50 +1,42 @@
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { IconHeart } from '../icons/Icons';
 import type { Product } from '../../types';
 
 type Props = {
   product: Product;
-  className?: string;
-  large?: boolean;
+  categoryLabel?: string;
+  onWishlistToggle?: () => void;
+  wishlisted?: boolean;
 };
 
-export function ProductCard({ product, className = '', large }: Props) {
+export function ProductCard({ product, categoryLabel = 'CATALOG', onWishlistToggle, wishlisted }: Props) {
   const image = product.images?.[0];
-  const rating = product.avgRating ?? 0;
-  const reviews = product.reviewCount ?? 0;
-
   return (
-    <motion.article
-      whileHover={{ y: -4 }}
-      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-      className={`group glass overflow-hidden rounded-2xl ${className}`}
-    >
-      <Link to={`/product/${product._id}`} className="block">
-        <div className={`relative overflow-hidden bg-surface-2 ${large ? 'aspect-[16/10]' : 'aspect-[4/3]'}`}>
-          {image ? (
-            <img
-              src={image}
-              alt={product.name}
-              className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-              loading="lazy"
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center text-muted">No image</div>
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-void/80 via-transparent to-transparent opacity-80" />
-          <div className="absolute bottom-3 left-3 right-3">
-            <h3 className={`font-display font-semibold text-text ${large ? 'text-2xl' : 'text-lg'}`}>
-              {product.name}
-            </h3>
-            <div className="mt-1 flex items-center justify-between text-sm">
-              <span className="font-medium text-accent">${product.basePrice.toFixed(2)}</span>
-              <span className="text-muted">
-                {reviews > 0 ? `★ ${rating.toFixed(1)} (${reviews})` : 'New'}
-              </span>
-            </div>
-          </div>
-        </div>
+    <article className="card group overflow-hidden">
+      <Link to={`/product/${product._id}`} className="relative block aspect-[4/5] bg-surface-2">
+        {image ? (
+          <img src={image} alt={product.name} className="h-full w-full object-cover" loading="lazy" />
+        ) : (
+          <div className="flex h-full items-center justify-center text-muted">No image</div>
+        )}
+        {onWishlistToggle && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              onWishlistToggle();
+            }}
+            className="absolute right-3 top-3 rounded-full border border-border bg-bg/80 p-2 text-text"
+          >
+            <IconHeart className="h-4 w-4" filled={wishlisted} />
+          </button>
+        )}
       </Link>
-    </motion.article>
+      <div className="border-t border-border p-4">
+        <p className="eyebrow text-[10px]">{categoryLabel}</p>
+        <h3 className="mt-1 font-semibold leading-snug">{product.name}</h3>
+        <p className="mt-2 text-sm font-medium">${product.basePrice.toFixed(2)}</p>
+      </div>
+    </article>
   );
 }

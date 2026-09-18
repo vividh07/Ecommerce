@@ -2,9 +2,25 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api } from '../lib/api';
 import { getSocket } from '../lib/socket';
+import { Breadcrumbs } from '../components/layout/ShopNavbar';
+import { Stepper } from '../components/ui/Stepper';
+import { ShipmentTimeline } from '../components/orders/OrderTimeline';
 import type { Order, StatusHistoryEntry } from '../types';
-import { OrderTimeline } from '../components/orders/OrderTimeline';
 import { Skeleton } from '../components/ui/Skeleton';
+
+const trackSteps = [
+  { id: 'confirmed', label: 'Confirmed' },
+  { id: 'packed', label: 'Packed' },
+  { id: 'shipped', label: 'Shipped' },
+  { id: 'delivered', label: 'Delivered' },
+];
+
+function trackIndex(status: string) {
+  if (status === 'DELIVERED') return 3;
+  if (status === 'OUT_FOR_DELIVERY' || status === 'SHIPPED') return 2;
+  if (status === 'CONFIRMED') return 1;
+  return 0;
+}
 
 export function OrderDetailPage() {
   const { orderId } = useParams();
@@ -23,8 +39,8 @@ export function OrderDetailPage() {
   useEffect(() => {
     const socket = getSocket();
     if (!socket || !orderId) return;
-    const handler = (payload: { orderId: string; status: string }) => {
-      if (payload.orderId === orderId) {
+    const handler = (p: { orderId: string }) => {
+      if (p.orderId === orderId) {
         api.get(`/orders/${orderId}`).then((res) => {
           setOrder(res.data.data.order);
           setHistory(res.data.data.history ?? []);
@@ -32,54 +48,55 @@ export function OrderDetailPage() {
       }
     };
     socket.on('order:updated', handler);
-    return () => {
-      socket.off('order:updated', handler);
-    };
+    return () => { socket.off('order:updated', handler); };
   }, [orderId]);
 
   if (loading) return <Skeleton className="h-64 w-full" />;
   if (!order) return <p className="text-muted">Order not found.</p>;
 
   return (
-    <div className="grid gap-10 lg:grid-cols-2">
-      <div>
-        <Link to="/orders" className="text-sm text-accent hover:underline">← Orders</Link>
-        <h1 className="mt-2 font-display text-3xl font-bold">
-          Order #{order._id.slice(-8).toUpperCase()}
-        </h1>
-        <p className="text-muted">{new Date(order.createdAt).toLocaleString()}</p>
-        <div className="mt-6 glass rounded-2xl p-5 space-y-2 text-sm">
-          <div className="flex justify-between">
-            <span className="text-muted">Subtotal</span>
-            <span>${order.subtotalAmount.toFixed(2)}</span>
-          </div>
-          {order.discountAmount && order.discountAmount > 0 && (
-            <div className="flex justify-between text-success">
-              <span>Discount {order.couponCode ? `(${order.couponCode})` : ''}</span>
-              <span>-${order.discountAmount.toFixed(2)}</span>
-            </div>
-          )}
-          <div className="flex justify-between font-semibold text-accent">
-            <span>Total</span>
-            <span>${order.totalAmount.toFixed(2)}</span>
-          </div>
-          <p className="pt-2 text-muted">{order.paymentStatus} · {order.status.replace(/_/g, ' ')}</p>
-        </div>
-        <ul className="mt-6 space-y-2 text-sm">
-          {order.items.map((item, i) => (
-            <li key={i} className="glass rounded-xl px-4 py-3">
-              {item.productName} {item.variantLabel && `(${item.variantLabel})`} × {item.quantity}
-            </li>
-          ))}
-        </ul>
-      </div>
-      <div className="glass rounded-2xl p-6">
-        <h2 className="font-display text-xl font-semibold">Tracking</h2>
-        <p className="mt-1 text-sm text-muted">Live updates via Socket.io</p>
+    <div>
+      <Breadcrumbs items={[{ label: 'ACCOUNT', to: '/orders' }, { label: 'ORDERS', to: '/orders' }, { label: `#${order._id.slice(-6)}` }]} />
+      <h1 className="page-title mt-4">On its way.</h1>
+      <p className="mt-2 text-muted">Your order #{order._id.slice(-6).toUpperCase()} is on the move.</p>
+
+      <div className="mt-10 card p-6">
+        <p className="text-sm text-muted">Estimated arrival</p>
+        <p className="text-2xl font-semibold">{new Date(Date.now() + 5 * 86400000).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' })}</p>
         <div className="mt-6">
-          <OrderTimeline current={order.status} history={history} />
+          <Stepper steps={trackSteps} current={trackIndex(order.status)} variant="tracking" />
         </div>
       </div>
+
+      <div className="mt-10 grid gap-8 lg:grid-cols-2">
+        <div className="card p-6">
+          <h2 className="font-semibold">Shipment history</h2>
+          <ShipmentTimeline history={history} current={order.status} />
+        </div>
+        <div className="card p-6">
+          <h2 className="font-semibold">Order summary</h2>
+          <ul className="mt-4 space-y-4">
+            {order.items.map((item, i) => (
+              <li key={i} className="flex justify-between gap-4 text-sm border-b border-border pb-4 last:border-0">
+                <div>
+                  <p className="font-medium">{item.productName}</p>
+                  <p className="text-muted">{item.variantLabel}</p>
+                </div>
+                <div className="text-right">
+                  <p>${item.lineTotal.toFixed(2)}</p>
+                  <p className="text-muted">× {item.quantity}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-4 text-2xl font-bold">${order.totalAmount.toFixed(2)}</p>
+          <div className="mt-6 flex flex-wrap gap-2">
+            <button type="button" className="btn-outline text-sm">Download invoice</button>
+            <button type="button" className="btn-outline text-sm">Contact support</button>
+          </div>
+        </div>
+      </div>
+      <Link to="/orders" className="mt-8 inline-block text-sm text-accent">← Back to orders</Link>
     </div>
   );
 }

@@ -1,23 +1,25 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { api, type ApiListMeta } from '../lib/api';
+import { api } from '../lib/api';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
+import { Breadcrumbs } from '../components/layout/ShopNavbar';
 import { ProductCard } from '../components/products/ProductCard';
 import { ProductCardSkeleton } from '../components/ui/Skeleton';
+import { useWishlist } from '../context/WishlistContext';
 import type { Category, Product } from '../types';
 
 export function BrowsePage() {
   const [params, setParams] = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
-  const [meta, setMeta] = useState<ApiListMeta | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState(params.get('q') ?? '');
   const debouncedQ = useDebouncedValue(q);
-
-  const categoryId = params.get('categoryId') ?? '';
-  const sort = params.get('sort') ?? 'newest';
-  const page = Number(params.get('page') ?? 1);
+  const { isWishlisted, toggle } = useWishlist();
+  const [minPrice, setMinPrice] = useState(params.get('minPrice') ?? '');
+  const [maxPrice, setMaxPrice] = useState(params.get('maxPrice') ?? '');
+  const [inStock, setInStock] = useState(true);
+  const [selectedCats, setSelectedCats] = useState<string[]>([]);
 
   useEffect(() => {
     api.get('/catalog/categories').then((res) => setCategories(res.data.data ?? []));
@@ -27,154 +29,116 @@ export function BrowsePage() {
     const next = new URLSearchParams(params);
     if (debouncedQ) next.set('q', debouncedQ);
     else next.delete('q');
-    if (next.toString() !== params.toString()) setParams(next, { replace: true });
+    setParams(next, { replace: true });
   }, [debouncedQ]);
 
-  useEffect(() => {
+  function fetchProducts() {
     setLoading(true);
     api
       .get('/catalog/products', {
         params: {
           q: params.get('q') || undefined,
-          categoryId: categoryId || undefined,
-          sort,
-          page,
-          limit: 12,
-          minPrice: params.get('minPrice') || undefined,
-          maxPrice: params.get('maxPrice') || undefined,
-          minRating: params.get('minRating') || undefined,
+          categoryId: selectedCats[0] || params.get('categoryId') || undefined,
+          minPrice: minPrice || undefined,
+          maxPrice: maxPrice || undefined,
+          sort: params.get('sort') || 'newest',
+          limit: 24,
         },
       })
-      .then((res) => {
-        setProducts(res.data.items ?? []);
-        setMeta(res.data.meta ?? null);
-      })
+      .then((res) => setProducts(res.data.items ?? []))
       .finally(() => setLoading(false));
-  }, [params, categoryId, sort, page]);
-
-  useEffect(() => {
-    document.title = debouncedQ
-      ? `Search: ${debouncedQ} | Nexus Market`
-      : 'Browse | Nexus Market';
-  }, [debouncedQ]);
-
-  function updateParam(key: string, value: string) {
-    const next = new URLSearchParams(params);
-    if (value) next.set(key, value);
-    else next.delete(key);
-    if (key !== 'page') next.set('page', '1');
-    setParams(next);
   }
 
-  return (
-    <div className="grid gap-8 lg:grid-cols-[240px_1fr]">
-      <aside className="glass h-fit rounded-2xl p-5 space-y-4">
-        <h2 className="font-display text-lg font-semibold">Filters</h2>
-        <div>
-          <label className="mb-1 block text-xs text-muted">Category</label>
-          <select
-            className="input-field"
-            value={categoryId}
-            onChange={(e) => updateParam('categoryId', e.target.value)}
-          >
-            <option value="">All</option>
-            {categories.map((c) => (
-              <option key={c._id} value={c._id}>{c.name}</option>
-            ))}
-          </select>
-        </div>
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <label className="mb-1 block text-xs text-muted">Min $</label>
-            <input
-              type="number"
-              className="input-field"
-              value={params.get('minPrice') ?? ''}
-              onChange={(e) => updateParam('minPrice', e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-xs text-muted">Max $</label>
-            <input
-              type="number"
-              className="input-field"
-              value={params.get('maxPrice') ?? ''}
-              onChange={(e) => updateParam('maxPrice', e.target.value)}
-            />
-          </div>
-        </div>
-        <div>
-          <label className="mb-1 block text-xs text-muted">Min rating</label>
-          <select
-            className="input-field"
-            value={params.get('minRating') ?? ''}
-            onChange={(e) => updateParam('minRating', e.target.value)}
-          >
-            <option value="">Any</option>
-            <option value="4">4+ stars</option>
-            <option value="3">3+ stars</option>
-          </select>
-        </div>
-        <div>
-          <label className="mb-1 block text-xs text-muted">Sort</label>
-          <select
-            className="input-field"
-            value={sort}
-            onChange={(e) => updateParam('sort', e.target.value)}
-          >
-            <option value="newest">Newest</option>
-            <option value="price_asc">Price ↑</option>
-            <option value="price_desc">Price ↓</option>
-            <option value="rating">Top rated</option>
-          </select>
-        </div>
-      </aside>
+  useEffect(() => {
+    fetchProducts();
+  }, [params, selectedCats, minPrice, maxPrice]);
 
-      <div>
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h1 className="font-display text-3xl font-bold">Catalog</h1>
-          <input
-            type="search"
-            placeholder="Search products..."
-            className="input-field max-w-md"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-          />
+  return (
+    <div>
+      <Breadcrumbs items={[{ label: 'HOME', to: '/browse' }, { label: 'DISCOVER' }]} />
+      <div className="mt-6 flex flex-wrap items-end justify-between gap-6">
+        <h1 className="page-title max-w-3xl">
+          Find your <span className="text-accent">next</span> favorite.
+        </h1>
+        <p className="eyebrow hidden md:block">Good things go further</p>
+      </div>
+
+      <div className="mt-10 grid gap-10 lg:grid-cols-[260px_1fr]">
+        <aside className="card h-fit p-5">
+          <div className="flex items-center justify-between">
+            <h2 className="font-semibold">Filters</h2>
+            <button type="button" className="text-xs text-muted hover:text-accent" onClick={() => { setSelectedCats([]); setMinPrice(''); setMaxPrice(''); }}>
+              Clear all
+            </button>
+          </div>
+          <div className="mt-6 border-t border-border pt-4">
+            <p className="text-sm font-medium">Category</p>
+            <ul className="mt-3 space-y-2">
+              {categories.map((c) => {
+                const checked = selectedCats.includes(c._id);
+                return (
+                  <li key={c._id}>
+                    <label className="flex cursor-pointer items-center gap-2 text-sm text-muted">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 rounded border-border accent-accent"
+                        checked={checked}
+                        onChange={() =>
+                          setSelectedCats(checked ? selectedCats.filter((id) => id !== c._id) : [c._id])
+                        }
+                      />
+                      {c.name}
+                    </label>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+          <div className="mt-6 border-t border-border pt-4">
+            <p className="text-sm font-medium">Price range</p>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <input className="input-field" placeholder="Min" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} />
+              <input className="input-field" placeholder="Max" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} />
+            </div>
+          </div>
+          <div className="mt-6 border-t border-border pt-4">
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" className="accent-accent" checked={inStock} onChange={(e) => setInStock(e.target.checked)} />
+              In stock only
+            </label>
+          </div>
+          <button type="button" className="btn-primary mt-6 w-full" onClick={fetchProducts}>
+            Apply filters →
+          </button>
+        </aside>
+
+        <div>
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-border pb-4">
+            <p className="text-sm text-muted">{products.length} products</p>
+            <input
+              className="input-field max-w-xs"
+              placeholder="Search…"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+            />
+          </div>
+          {loading ? (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => <ProductCardSkeleton key={i} />)}
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {products.map((p) => (
+                <ProductCard
+                  key={p._id}
+                  product={p}
+                  wishlisted={isWishlisted(p._id)}
+                  onWishlistToggle={() => toggle(p._id).catch(() => {})}
+                />
+              ))}
+            </div>
+          )}
         </div>
-        {loading ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => <ProductCardSkeleton key={i} />)}
-          </div>
-        ) : products.length === 0 ? (
-          <p className="text-muted">No products match your filters.</p>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {products.map((p) => <ProductCard key={p._id} product={p} />)}
-          </div>
-        )}
-        {meta && meta.totalPages > 1 && (
-          <div className="mt-8 flex justify-center gap-2">
-            <button
-              type="button"
-              disabled={!meta.hasPrev}
-              className="btn-ghost disabled:opacity-40"
-              onClick={() => updateParam('page', String(page - 1))}
-            >
-              Previous
-            </button>
-            <span className="flex items-center px-3 text-sm text-muted">
-              Page {meta.page} of {meta.totalPages}
-            </span>
-            <button
-              type="button"
-              disabled={!meta.hasNext}
-              className="btn-ghost disabled:opacity-40"
-              onClick={() => updateParam('page', String(page + 1))}
-            >
-              Next
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );
