@@ -1,0 +1,9 @@
+{
+  "name": "nexus-market",
+  "private": true,
+  "scripts": {
+    "dev:api": "npm run dev --prefix backend",
+    "dev:web": "npm run dev --prefix frontend",
+    "seed": "npm run seed --prefix backend"
+  }
+}
