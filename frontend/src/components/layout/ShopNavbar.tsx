@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { IconBag, IconHeart, IconSearch } from '../icons/Icons';
+import { IconBag, IconClose, IconHeart, IconMenu, IconSearch } from '../icons/Icons';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 
@@ -17,38 +18,67 @@ export function ShopNavbar() {
   const { itemCount } = useCart();
   const navigate = useNavigate();
   const location = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [query, setQuery] = useState('');
+
+  const categoryParam = new URLSearchParams(location.search).get('category')?.toLowerCase();
+
+  function isActive(item: (typeof CATEGORIES)[number]) {
+    if (!location.pathname.startsWith('/browse') && !location.pathname.startsWith('/product')) {
+      return false;
+    }
+    if (item.featured) return !categoryParam;
+    return categoryParam === item.label.toLowerCase();
+  }
+
+  function submitSearch(value: string) {
+    const q = value.trim();
+    navigate(q ? `/browse?q=${encodeURIComponent(q)}` : '/browse');
+    setMobileOpen(false);
+  }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-bg">
-      <div className="mx-auto flex h-[72px] max-w-[1600px] items-center gap-4 px-6 lg:gap-8 lg:px-10">
-        <Link to="/browse" className="wordmark shrink-0">SHOP</Link>
+    <header className="sticky top-0 z-50 border-b border-border bg-bg/95 backdrop-blur-md">
+      <div className="mx-auto flex h-[72px] max-w-[1600px] items-center gap-3 px-4 sm:px-6 lg:gap-8 lg:px-10">
+        <button
+          type="button"
+          className="rounded-full p-2 text-text lg:hidden"
+          aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+          onClick={() => setMobileOpen((v) => !v)}
+        >
+          {mobileOpen ? <IconClose className="h-5 w-5" /> : <IconMenu className="h-5 w-5" />}
+        </button>
+
+        <Link to="/" className="wordmark shrink-0" onClick={() => setMobileOpen(false)}>
+          SHOP
+        </Link>
 
         <nav className="hidden items-center gap-5 lg:flex">
           {CATEGORIES.map((item) => {
-            const active = item.featured && location.pathname.startsWith('/browse');
+            const active = isActive(item);
             return (
               <NavLink
                 key={item.label}
                 to={item.to}
                 className={`nav-link flex items-center gap-2 whitespace-nowrap ${active ? 'nav-link-active' : ''}`}
               >
-                {item.featured && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />}
+                {active && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />}
                 {item.label}
               </NavLink>
             );
           })}
         </nav>
 
-        <div className="relative mx-auto hidden min-w-0 max-w-2xl flex-1 lg:block">
+        <div className="relative mx-auto hidden min-w-0 max-w-2xl flex-1 md:block">
           <IconSearch className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
           <input
             type="search"
             className="input-pill"
             placeholder="Search for products, brands, inspiration..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                navigate(`/browse?q=${encodeURIComponent((e.target as HTMLInputElement).value)}`);
-              }
+              if (e.key === 'Enter') submitSearch((e.target as HTMLInputElement).value);
             }}
           />
         </div>
@@ -67,14 +97,50 @@ export function ShopNavbar() {
             aria-label="Cart"
           >
             <IconBag className="h-5 w-5" />
-            {itemCount > 0 && (
-              <span className="absolute right-0.5 top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-accent px-1 text-[10px] font-bold text-accent-fg">
-                {itemCount > 99 ? '99+' : itemCount}
-              </span>
-            )}
+            <span className="absolute right-0.5 top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-accent px-1 text-[10px] font-bold text-accent-fg">
+              {itemCount > 99 ? '99+' : itemCount}
+            </span>
           </Link>
         </div>
       </div>
+
+      <div className="border-t border-border lg:hidden">
+        <nav className="flex gap-1 overflow-x-auto px-4 py-2.5 scrollbar-none sm:px-6">
+          {CATEGORIES.map((item) => {
+            const active = isActive(item);
+            return (
+              <Link
+                key={item.label}
+                to={item.to}
+                className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-sm whitespace-nowrap ${
+                  active ? 'bg-white/5 text-text' : 'text-muted'
+                }`}
+              >
+                {active && <span className="h-1.5 w-1.5 rounded-full bg-accent" />}
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
+
+      {mobileOpen && (
+        <div className="border-t border-border bg-bg px-4 pb-5 pt-3 lg:hidden sm:px-6">
+          <div className="relative">
+            <IconSearch className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+            <input
+              type="search"
+              className="input-pill"
+              placeholder="Search for products, brands, inspiration..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') submitSearch((e.target as HTMLInputElement).value);
+              }}
+            />
+          </div>
+        </div>
+      )}
     </header>
   );
 }
@@ -100,7 +166,7 @@ export function Breadcrumbs({ items }: { items: { label: string; to?: string }[]
 
 export function PageContainer({ children, wide }: { children: React.ReactNode; wide?: boolean }) {
   return (
-    <div className={`mx-auto px-6 pb-20 pt-0 lg:px-10 ${wide ? 'max-w-[1600px]' : 'max-w-[1400px]'}`}>
+    <div className={`mx-auto px-4 pb-20 pt-0 sm:px-6 lg:px-10 ${wide ? 'max-w-[1600px]' : 'max-w-[1400px]'}`}>
       {children}
     </div>
   );

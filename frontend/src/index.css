@@ -58,10 +58,10 @@
   }
 
   .page-title-mixed {
-    @apply text-4xl font-bold leading-tight text-text md:text-5xl;
+    @apply text-4xl font-bold leading-[1.05] text-text md:text-5xl lg:text-[3.5rem];
     font-family: var(--font-body);
     text-transform: none;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.03em;
   }
 
   .auth-title {
@@ -114,7 +114,34 @@
   }
 
   .product-tile-image {
-    @apply flex aspect-square items-center justify-center bg-[#1a1a1a];
+    @apply flex aspect-square items-center justify-center bg-[#151515];
+  }
+
+  .pagination-link {
+    @apply relative px-2 py-1 text-sm text-muted transition hover:text-text;
+  }
+
+  .pagination-link-active {
+    @apply font-semibold text-text;
+  }
+
+  .pagination-link-active::after {
+    content: '';
+    position: absolute;
+    left: 0.25rem;
+    right: 0.25rem;
+    bottom: 0;
+    height: 2px;
+    background: var(--color-accent);
+  }
+
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
   }
 
   .filter-chip {

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { IconHeart } from '../icons/Icons';
+import { formatINR } from '../../lib/money';
 import type { Product } from '../../types';
 
 type Props = {
@@ -18,7 +19,7 @@ export function ProductCard({ product, categoryLabel = 'CATALOG', onWishlistTogg
           <img
             src={image}
             alt={product.name}
-            className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
+            className="h-full w-full object-contain p-3 transition duration-300 group-hover:scale-[1.02]"
             loading="lazy"
           />
         ) : (
@@ -31,16 +32,17 @@ export function ProductCard({ product, categoryLabel = 'CATALOG', onWishlistTogg
               e.preventDefault();
               onWishlistToggle();
             }}
-            className="absolute right-3 top-3 rounded-full border border-border bg-bg/90 p-2 text-text backdrop-blur-sm"
+            className="absolute right-3 top-3 rounded-full p-2 text-text transition hover:text-accent"
+            aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
           >
             <IconHeart className="h-4 w-4" filled={wishlisted} />
           </button>
         )}
       </Link>
-      <div className="border-t border-border p-4">
+      <div className="p-4 pt-3">
         <p className="eyebrow text-[10px]">{categoryLabel}</p>
         <h3 className="mt-1.5 font-semibold leading-snug line-clamp-2">{product.name}</h3>
-        <p className="mt-2 text-sm font-semibold">${product.basePrice.toFixed(2)}</p>
+        <p className="mt-2 text-sm font-semibold">{formatINR(product.basePrice)}</p>
       </div>
     </article>
   );

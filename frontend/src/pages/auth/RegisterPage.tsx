@@ -2,68 +2,123 @@ import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
-import { AuthField, AuthLayout, AuthLink } from './AuthLayout';
-import { IconChevronRight } from '../../components/icons/Icons';
+import {
+  AuthDivider,
+  AuthField,
+  AuthPrimaryButton,
+  AuthShell,
+  AuthTextLink,
+  GoogleButton,
+} from './AuthLayout';
 
 export function RegisterPage() {
   const { register } = useAuth();
   const navigate = useNavigate();
   const [params] = useSearchParams();
+  const role = params.get('role') === 'seller' ? 'SELLER' : 'CUSTOMER';
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState(params.get('role') === 'seller' ? 'SELLER' : 'CUSTOMER');
+  const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!agreed) {
+      toast.error('Please agree to the Terms and Privacy Policy');
+      return;
+    }
+    if (password.length < 8) {
+      toast.error('Use at least 8 characters');
+      return;
+    }
     setLoading(true);
     try {
-      await register(name, email, password, role);
+      await register(name.trim(), email.trim(), password, role);
       toast.success('Account created');
-      navigate(role === 'SELLER' ? '/seller' : '/browse');
-    } catch (err: any) {
-      toast.error(err.response?.data?.message ?? 'Registration failed');
+      navigate(role === 'SELLER' ? '/seller' : '/browse', { replace: true });
+    } catch (err: unknown) {
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+        'Registration failed';
+      toast.error(message);
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <AuthLayout
-      eyebrow="Join SHOP"
-      title="Your next favorite starts here."
-      subtitle="Create an account to get started."
-      footer={
-        <>
-          Already have an account? <AuthLink to="/login">Sign in</AuthLink>
-        </>
-      }
+    <AuthShell
+      panelHeadline="Find your everyday extra."
+      panelSubline="Save what you love. Make it yours."
     >
-      <form onSubmit={onSubmit} className="space-y-5">
-        <AuthField label="Full name" value={name} onChange={setName} placeholder="Alex Carter" />
-        <AuthField label="Email" type="email" value={email} onChange={setEmail} placeholder="you@yourmail.com" />
-        <AuthField
-          label="Password"
-          type="password"
-          value={password}
-          onChange={setPassword}
-          placeholder="••••••••"
-          hint="Use at least 8 characters with a mix of letters, numbers and symbols."
+      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-accent">Make it yours</p>
+      <h1 className="auth-title mt-3">Your next favourite starts here.</h1>
+      <p className="mt-3 text-[0.95rem] text-muted">A little account. A world of good finds.</p>
+
+      <div className="mt-8 space-y-5">
+        <GoogleButton
+          onClick={() => toast('Google sign-in is not configured yet.')}
         />
-        <select className="input-field" value={role} onChange={(e) => setRole(e.target.value)}>
-          <option value="CUSTOMER">I want to shop</option>
-          <option value="SELLER">I want to sell</option>
-        </select>
-        <label className="flex gap-2 text-xs text-muted">
-          <input type="checkbox" className="mt-0.5 accent-accent" required />
-          I agree to the Terms of Service and Privacy Policy
-        </label>
-        <button type="submit" className="btn-primary w-full" disabled={loading}>
-          Create account <IconChevronRight />
-        </button>
-        <button type="button" className="btn-outline w-full">Continue with Google</button>
-      </form>
-    </AuthLayout>
+        <AuthDivider label="Or create an account with email" />
+
+        <form onSubmit={onSubmit} className="space-y-5">
+          <AuthField
+            label="Full name"
+            value={name}
+            onChange={setName}
+            placeholder="Alex Carter"
+            autoComplete="name"
+          />
+          <AuthField
+            label="Email address"
+            type="email"
+            value={email}
+            onChange={setEmail}
+            placeholder="you@example.com"
+            autoComplete="email"
+          />
+          <AuthField
+            label="Password"
+            type="password"
+            value={password}
+            onChange={setPassword}
+            placeholder="••••••••"
+            autoComplete="new-password"
+            hint="Use at least 8 characters."
+          />
+
+          <label className="flex cursor-pointer items-start gap-2.5 text-sm text-muted">
+            <input
+              type="checkbox"
+              checked={agreed}
+              onChange={(e) => setAgreed(e.target.checked)}
+              className="mt-0.5 h-4 w-4 shrink-0 rounded border-border bg-panel-2 accent-accent"
+              required
+            />
+            <span>
+              I agree to the{' '}
+              <a href="#terms" className="text-text underline underline-offset-4">
+                Terms of Service
+              </a>{' '}
+              and{' '}
+              <a href="#privacy" className="text-text underline underline-offset-4">
+                Privacy Policy
+              </a>
+              .
+            </span>
+          </label>
+
+          <AuthPrimaryButton loading={loading}>
+            {loading ? 'Creating account…' : 'Create account'}
+          </AuthPrimaryButton>
+        </form>
+
+        <p className="pt-1 text-center text-sm text-muted">
+          Already have an account? <AuthTextLink to="/login">Sign in</AuthTextLink>
+        </p>
+      </div>
+    </AuthShell>
   );
 }

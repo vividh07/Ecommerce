@@ -1,0 +1,98 @@
+[
+  {
+    "id": "headphones-silver",
+    "file": "products/headphones-silver.png",
+    "width": 1254,
+    "height": 1254
+  },
+  {
+    "id": "lamp-orange",
+    "file": "products/lamp-orange.png",
+    "width": 1254,
+    "height": 1254
+  },
+  {
+    "id": "sneakers-running",
+    "file": "products/sneakers-running.png",
+    "width": 1254,
+    "height": 1254
+  },
+  {
+    "id": "sling-olive",
+    "file": "products/sling-olive.png",
+    "width": 1254,
+    "height": 1254
+  },
+  {
+    "id": "cleanser-amber",
+    "file": "products/cleanser-amber.png",
+    "width": 1254,
+    "height": 1254
+  },
+  {
+    "id": "keyboard-charcoal",
+    "file": "products/keyboard-charcoal.png",
+    "width": 1254,
+    "height": 1254
+  },
+  {
+    "id": "sneakers-court",
+    "file": "products/sneakers-court.png",
+    "width": 1254,
+    "height": 1254
+  },
+  {
+    "id": "tote-olive",
+    "file": "products/tote-olive.png",
+    "width": 1254,
+    "height": 1254
+  },
+  {
+    "id": "duffle-olive",
+    "file": "products/duffle-olive.png",
+    "width": 1254,
+    "height": 1254
+  },
+  {
+    "id": "headphones-front",
+    "file": "products/headphones-front.png",
+    "width": 1254,
+    "height": 1254
+  },
+  {
+    "id": "headphones-side",
+    "file": "products/headphones-side.png",
+    "width": 1254,
+    "height": 1254
+  },
+  {
+    "id": "headphones-folded",
+    "file": "products/headphones-folded.png",
+    "width": 1254,
+    "height": 1254
+  },
+  {
+    "id": "auth-still-life",
+    "file": "artwork/auth-still-life.png",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "id": "hero-still-life",
+    "file": "artwork/hero-still-life.png",
+    "width": 1536,
+    "height": 1024
+  },
+  {
+    "id": "login-ui",
+    "file": "ui-references/login-ui.png",
+    "width": 1536,
+    "height": 1024
+  },
+  {
+    "id": "signup-ui",
+    "file": "ui-references/signup-ui.png",
+    "width": 1536,
+    "height": 1024
+  }
+]

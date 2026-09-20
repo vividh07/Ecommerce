@@ -81,7 +81,7 @@ export const checkoutService = {
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amountCents,
-      currency: 'usd',
+      currency: 'inr',
       automatic_payment_methods: { enabled: true },
       metadata: {
         userId: userId.toString(),
