@@ -12,6 +12,7 @@ import sellerRoutes from './sellerRoutes.js';
 import adminRoutes from './adminRoutes.js';
 import shoppingRoomRoutes from './shoppingRoomRoutes.js';
 import dashboardRoutes from './dashboardRoutes.js';
+import siteRoutes from './siteRoutes.js';
 
 const router = Router();
 
@@ -28,5 +29,6 @@ router.use('/sellers', sellerRoutes);
 router.use('/admin', adminRoutes);
 router.use('/shopping-rooms', shoppingRoomRoutes);
 router.use('/dashboard', dashboardRoutes);
+router.use('/site', siteRoutes);
 
 export default router;

@@ -1,20 +1,53 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import { ShopNavbar, PageContainer } from './ShopNavbar';
+import { SiteFooter } from './SiteFooter';
+
+const FULL_BLEED_EXACT = new Set(['/', '/about', '/404']);
+
+const CONTAINED_PREFIXES = [
+  '/browse',
+  '/product',
+  '/wishlist',
+  '/shopping-room',
+  '/room',
+  '/dashboard',
+  '/cart',
+  '/checkout',
+  '/orders',
+  '/account',
+  '/seller',
+  '/contact',
+  '/help',
+  '/shipping-returns',
+  '/privacy',
+  '/terms',
+];
+
+function isFullBleedPath(pathname: string) {
+  if (FULL_BLEED_EXACT.has(pathname)) return true;
+  const known = CONTAINED_PREFIXES.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`)
+  );
+  return !known;
+}
 
 export function Shell() {
   const { pathname } = useLocation();
-  const isHome = pathname === '/';
+  const isFullBleed = isFullBleedPath(pathname);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="flex min-h-screen flex-col bg-black">
       <ShopNavbar />
-      {isHome ? (
-        <Outlet />
-      ) : (
-        <PageContainer wide>
+      <main className="flex-1">
+        {isFullBleed ? (
           <Outlet />
-        </PageContainer>
-      )}
+        ) : (
+          <PageContainer wide>
+            <Outlet />
+          </PageContainer>
+        )}
+      </main>
+      <SiteFooter />
     </div>
   );
 }

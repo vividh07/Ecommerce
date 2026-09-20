@@ -270,3 +270,55 @@ export function IconCreditCard({ className = 'h-4 w-4' }: IconProps) {
 export function IconShippingBox({ className = 'h-4 w-4' }: IconProps) {
   return <IconPackage className={className} />;
 }
+
+export function IconHeadset({ className = 'h-4 w-4' }: IconProps) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M4 14v-2a8 8 0 0116 0v2M4 14a2 2 0 002 2h1v-5H6a2 2 0 00-2 2zm16 0a2 2 0 01-2 2h-1v-5h1a2 2 0 012 2zm-7 4h2a3 3 0 003-3v-1H10v1a3 3 0 003 3z"
+      />
+    </svg>
+  );
+}
+
+export function IconChevronUp({ className = 'h-4 w-4' }: IconProps) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
+    </svg>
+  );
+}
+
+export function IconDocument({ className = 'h-4 w-4' }: IconProps) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+      />
+    </svg>
+  );
+}
+
+export function IconCube({ className = 'h-4 w-4' }: IconProps) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-4.5-9 4.5m18 0l-9 4.5m9-4.5v9l-9 4.5m0-13.5L3 7.5m9 4.5v9M3 7.5v9l9 4.5" />
+    </svg>
+  );
+}
+
+export function IconMessage({ className = 'h-4 w-4' }: IconProps) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+      />
+    </svg>
+  );
+}

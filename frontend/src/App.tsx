@@ -26,6 +26,12 @@ import { CheckoutPaymentPage } from './pages/checkout/CheckoutPaymentPage';
 import { AccountSettingsPage } from './pages/account/AccountSettingsPage';
 import { AddressesPage } from './pages/account/AddressesPage';
 import { ReturnRequestPage } from './pages/account/ReturnRequestPage';
+import { AboutPage } from './pages/AboutPage';
+import { ContactPage } from './pages/ContactPage';
+import { HelpPage } from './pages/HelpPage';
+import { ShippingReturnsPage } from './pages/ShippingReturnsPage';
+import { NotFoundPage } from './pages/NotFoundPage';
+import { PrivacyPage, TermsPage } from './pages/LegalPages';
 
 export default function App() {
   return (
@@ -52,6 +58,13 @@ export default function App() {
                 <Route index element={<HomePage />} />
                 <Route path="browse" element={<BrowsePage />} />
                 <Route path="product/:productId" element={<ProductDetailPage />} />
+                <Route path="about" element={<AboutPage />} />
+                <Route path="contact" element={<ContactPage />} />
+                <Route path="help" element={<HelpPage />} />
+                <Route path="shipping-returns" element={<ShippingReturnsPage />} />
+                <Route path="privacy" element={<PrivacyPage />} />
+                <Route path="terms" element={<TermsPage />} />
+                <Route path="404" element={<NotFoundPage />} />
                 <Route path="wishlist" element={<RequireAuth><WishlistPage /></RequireAuth>} />
                 <Route path="shopping-room" element={<RequireAuth><ShoppingRoomLobbyPage /></RequireAuth>} />
                 <Route path="room/:roomCode" element={<RequireAuth><ShoppingRoomPage /></RequireAuth>} />
@@ -68,7 +81,7 @@ export default function App() {
                 <Route path="account/addresses" element={<RequireAuth><AddressesPage /></RequireAuth>} />
                 <Route path="account/returns/:orderId" element={<RequireAuth><ReturnRequestPage /></RequireAuth>} />
                 <Route path="seller" element={<RequireAuth><SellerDashboardPage /></RequireAuth>} />
-                <Route path="*" element={<Navigate to="/browse" replace />} />
+                <Route path="*" element={<NotFoundPage />} />
               </Route>
             </Routes>
           </WishlistProvider>
