@@ -10,6 +10,12 @@ export const sellerRepository = {
   async findById(id) {
     return Seller.findOne({ _id: id, isDeleted: false });
   },
+  async updateByUserId(userId, data) {
+    return Seller.findOneAndUpdate({ userId, isDeleted: false }, data, {
+      new: true,
+      runValidators: true,
+    });
+  },
   async listPending({ skip, limit }) {
     const filter = { isApproved: false, isDeleted: false };
     const [items, total] = await Promise.all([

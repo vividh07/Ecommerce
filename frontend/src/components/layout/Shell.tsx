@@ -15,7 +15,6 @@ const CONTAINED_PREFIXES = [
   '/checkout',
   '/orders',
   '/account',
-  '/seller',
   '/contact',
   '/help',
   '/shipping-returns',
@@ -36,7 +35,7 @@ export function Shell() {
   const isFullBleed = isFullBleedPath(pathname);
 
   return (
-    <div className="flex min-h-screen flex-col bg-black">
+    <div className="flex min-h-screen flex-col bg-bg">
       <ShopNavbar />
       <main className="flex-1">
         {isFullBleed ? (

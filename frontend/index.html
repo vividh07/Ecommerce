@@ -12,6 +12,31 @@
       rel="stylesheet"
     />
     <title>SHOP</title>
+    <script>
+      (function () {
+        try {
+          var key = 'shop.theme';
+          var pref = localStorage.getItem(key) || 'dark';
+          var path = location.pathname || '/';
+          var resolved =
+            path.indexOf('/admin') === 0
+              ? 'dark'
+              : path.indexOf('/seller') === 0
+                ? 'light'
+                : pref === 'system'
+                  ? window.matchMedia('(prefers-color-scheme: light)').matches
+                    ? 'light'
+                    : 'dark'
+                  : pref === 'light'
+                    ? 'light'
+                    : 'dark';
+          document.documentElement.dataset.theme = resolved;
+          document.documentElement.style.colorScheme = resolved;
+        } catch (e) {
+          document.documentElement.dataset.theme = 'dark';
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
+import { clearSkipAuthFrom } from '../../lib/authRedirect';
+import type { Role } from '../../types';
 import {
   AuthAccentLink,
   AuthDivider,
@@ -11,26 +13,45 @@ import {
   GoogleButton,
 } from './AuthLayout';
 
+function homeForRole(role: Role): string {
+  if (role === 'ADMIN') return '/admin';
+  if (role === 'SELLER') return '/seller';
+  return '/';
+}
+
+function safeRedirectPath(pathname: string | undefined): string | null {
+  if (!pathname) return null;
+  if (pathname === '/login' || pathname === '/register') return null;
+  return pathname;
+}
+
 export function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? '/browse';
+  const from = safeRedirectPath(
+    (location.state as { from?: { pathname?: string } } | null)?.from?.pathname
+  );
 
   const [email, setEmail] = useState(() => localStorage.getItem('shop.rememberEmail') ?? '');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(() => Boolean(localStorage.getItem('shop.rememberEmail')));
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    clearSkipAuthFrom();
+  }, []);
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     try {
-      await login(email.trim(), password);
+      const user = await login(email.trim(), password);
       if (remember) localStorage.setItem('shop.rememberEmail', email.trim());
       else localStorage.removeItem('shop.rememberEmail');
       toast.success('Welcome back');
-      navigate(from, { replace: true });
+      // Prefer role home after a clean logout; honor fresh deep-link `from` only.
+      navigate(from ?? homeForRole(user.role), { replace: true });
     } catch (err: unknown) {
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??

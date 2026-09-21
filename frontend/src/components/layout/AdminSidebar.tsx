@@ -2,13 +2,16 @@ import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import {
   IconBag,
+  IconChart,
   IconClose,
   IconExternal,
   IconHome,
   IconMenu,
   IconOrders,
   IconPackage,
+  IconReturn,
   IconSettings,
+  IconTag,
   IconUser,
   IconChevronDown,
 } from '../icons/Icons';
@@ -18,9 +21,10 @@ const links = [
   { to: '/admin/products', label: 'Products', icon: IconPackage },
   { to: '/admin/orders', label: 'Orders', icon: IconOrders },
   { to: '/admin/inventory', label: 'Inventory', icon: IconBag },
-  { to: '/admin/sellers', label: 'Customers', icon: IconUser },
-  { to: '/admin/coupons', label: 'Discounts', icon: IconBag },
-  { to: '/admin/reports', label: 'Reports', icon: IconOrders },
+  { to: '/admin/customers', label: 'Customers', icon: IconUser },
+  { to: '/admin/discounts', label: 'Discounts', icon: IconTag },
+  { to: '/admin/returns', label: 'Returns', icon: IconReturn },
+  { to: '/admin/reports', label: 'Reports', icon: IconChart },
   { to: '/admin/settings', label: 'Settings', icon: IconSettings },
 ];
 
@@ -30,11 +34,9 @@ export function AdminSidebar() {
   return (
     <aside className="flex w-full flex-col border-b border-border bg-bg md:w-60 md:min-h-screen md:border-b-0 md:border-r">
       <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-4">
-        <div>
-          <p className="wordmark text-[1.05rem] tracking-[0.35em]">
-            SHOP <span className="font-body text-[0.7rem] font-normal tracking-normal text-muted">| ADMIN</span>
-          </p>
-        </div>
+        <p className="wordmark text-[1.05rem] tracking-[0.35em]">
+          SHOP <span className="font-body text-[0.7rem] font-normal tracking-normal text-muted">| ADMIN</span>
+        </p>
         <button
           type="button"
           className="rounded-[8px] border border-border p-2 text-muted md:hidden"
@@ -51,9 +53,14 @@ export function AdminSidebar() {
           type="button"
           className="mx-3 mt-3 flex w-[calc(100%-1.5rem)] items-center justify-between rounded-[10px] border border-border bg-[#141414] px-3 py-2.5 text-left"
         >
-          <div>
-            <p className="text-sm font-medium">Demo store</p>
-            <p className="text-[11px] text-muted">demo.shop.com</p>
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-8 w-8 items-center justify-center rounded-[8px] border border-border bg-[#1a1a1a] text-muted">
+              <IconHome className="h-3.5 w-3.5" />
+            </span>
+            <div>
+              <p className="text-sm font-medium">Demo store</p>
+              <p className="text-[11px] text-muted">demo.shop.com</p>
+            </div>
           </div>
           <IconChevronDown className="h-4 w-4 text-muted" />
         </button>
@@ -70,7 +77,7 @@ export function AdminSidebar() {
                 className={({ isActive }) =>
                   `relative flex items-center gap-3 rounded-r-[8px] py-2.5 pl-3.5 pr-3 text-sm transition ${
                     isActive
-                      ? 'bg-[#161616] text-white before:absolute before:left-0 before:top-1 before:bottom-1 before:w-[3px] before:rounded-full before:bg-[#d4ff3f]'
+                      ? 'bg-[#161616] text-white before:absolute before:left-0 before:top-1 before:bottom-1 before:w-[3px] before:rounded-full before:bg-[#d4ff3f] [&_svg]:text-[#d4ff3f]'
                       : 'text-muted hover:text-text'
                   }`
                 }

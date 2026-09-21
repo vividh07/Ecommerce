@@ -8,14 +8,15 @@ import {
   type ReactNode,
 } from 'react';
 import { api, setTokens } from '../lib/api';
+import { markSkipAuthFrom } from '../lib/authRedirect';
 import type { SellerProfile, User } from '../types';
 
 type AuthState = {
   user: User | null;
   seller: SellerProfile | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string, role?: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
+  register: (name: string, email: string, password: string, role?: string) => Promise<User>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 };
@@ -53,6 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setTokens(accessToken, refreshToken);
     setUser(u);
     await refreshProfile();
+    return u as User;
   }, [refreshProfile]);
 
   const register = useCallback(
@@ -62,11 +64,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setTokens(accessToken, refreshToken);
       setUser(u);
       await refreshProfile();
+      return u as User;
     },
     [refreshProfile]
   );
 
   const logout = useCallback(async () => {
+    markSkipAuthFrom();
     try {
       await api.post('/auth/logout');
     } catch {

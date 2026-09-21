@@ -38,6 +38,10 @@ export const productController = {
     const result = await productService.adminListProducts(req.query);
     res.json({ success: true, ...result });
   },
+  adminGet: async (req, res) => {
+    const product = await productService.adminGetProduct(req.params.productId);
+    res.json({ success: true, data: product });
+  },
   adminToggle: async (req, res) => {
     const product = await productService.adminToggleProduct(req.params.productId, req.validated);
     res.json({ success: true, data: product });

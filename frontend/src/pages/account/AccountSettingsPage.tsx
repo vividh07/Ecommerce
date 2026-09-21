@@ -2,8 +2,10 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { AccountSidebar } from '../../components/layout/AccountSidebar';
 import { Breadcrumbs } from '../../components/layout/ShopNavbar';
-import { IconChevronRight } from '../../components/icons/Icons';
+import { IconChevronRight, IconMonitor, IconMoon, IconSun } from '../../components/icons/Icons';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
+import type { ThemePreference } from '../../lib/theme';
 
 function Toggle({
   on,
@@ -22,7 +24,7 @@ function Toggle({
       aria-label={label}
       onClick={() => onChange(!on)}
       className={`relative h-7 w-12 shrink-0 rounded-full p-0.5 transition ${
-        on ? 'bg-[#d4ff3f]' : 'bg-white/15'
+        on ? 'bg-accent' : 'bg-border-strong'
       }`}
     >
       <span
@@ -32,8 +34,20 @@ function Toggle({
   );
 }
 
+const THEME_OPTIONS: {
+  id: ThemePreference;
+  label: string;
+  hint: string;
+  Icon: typeof IconSun;
+}[] = [
+  { id: 'light', label: 'Light', hint: 'Bright surfaces', Icon: IconSun },
+  { id: 'dark', label: 'Dark', hint: 'Default SHOP look', Icon: IconMoon },
+  { id: 'system', label: 'System', hint: 'Match device', Icon: IconMonitor },
+];
+
 export function AccountSettingsPage() {
   const { user } = useAuth();
+  const { preference, setPreference } = useTheme();
   const [name, setName] = useState(user?.name ?? '');
   const [email, setEmail] = useState(user?.email ?? '');
   const [phone, setPhone] = useState('');
@@ -100,6 +114,39 @@ export function AccountSettingsPage() {
               >
                 Save changes
               </button>
+            </div>
+          </section>
+
+          <section className="p-6 md:p-8">
+            <h2 className="text-base font-semibold">Appearance</h2>
+            <p className="mt-1 text-sm text-muted">
+              Choose light or dark for the storefront. Admin stays dark; Seller Center stays light.
+            </p>
+
+            <div className="mt-6 grid gap-3 sm:grid-cols-3">
+              {THEME_OPTIONS.map(({ id, label, hint, Icon }) => {
+                const selected = preference === id;
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => {
+                      setPreference(id);
+                      toast.success(`Theme set to ${label.toLowerCase()}`);
+                    }}
+                    className={`flex flex-col items-start gap-2 rounded-[10px] border p-4 text-left transition ${
+                      selected
+                        ? 'border-accent bg-accent/10'
+                        : 'border-border hover:border-border-strong'
+                    }`}
+                    aria-pressed={selected}
+                  >
+                    <Icon className="h-5 w-5 text-text" />
+                    <span className="text-sm font-medium text-text">{label}</span>
+                    <span className="text-xs text-muted">{hint}</span>
+                  </button>
+                );
+              })}
             </div>
           </section>
 

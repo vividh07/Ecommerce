@@ -73,6 +73,13 @@ router.get(
   asyncHandler(productController.adminList)
 );
 
+router.get(
+  '/admin/:productId',
+  authenticate,
+  requireRole('ADMIN'),
+  asyncHandler(productController.adminGet)
+);
+
 router.patch(
   '/admin/:productId',
   authenticate,

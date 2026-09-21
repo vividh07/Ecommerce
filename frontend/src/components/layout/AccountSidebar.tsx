@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import {
   IconClose,
@@ -22,7 +22,21 @@ const links = [
 
 export function AccountSidebar() {
   const { logout } = useAuth();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
+
+  async function onSignOut() {
+    if (signingOut) return;
+    setSigningOut(true);
+    // Leave the protected route first so RequireAuth does not stash `from`.
+    navigate('/login', { replace: true });
+    try {
+      await logout();
+    } finally {
+      setSigningOut(false);
+    }
+  }
 
   return (
     <aside className="w-full shrink-0 lg:w-[220px]">
@@ -47,10 +61,9 @@ export function AccountSidebar() {
               className={({ isActive }) =>
                 `relative flex items-center gap-3 rounded-r-[8px] py-3 pl-4 pr-3 text-sm transition ${
                   isActive
-                    ? 'bg-[#141414] text-white before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-[3px] before:rounded-full before:bg-[#d4ff3f]'
-                    : 'text-gray-400 hover:text-white'
-                }`
-              }
+                    ? 'bg-panel text-text before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-[3px] before:rounded-full before:bg-accent'
+                    : 'text-muted hover:text-text'
+                }`}
             >
               <Icon className="h-4 w-4 shrink-0 opacity-80" />
               {link.label}
@@ -59,11 +72,12 @@ export function AccountSidebar() {
         })}
         <button
           type="button"
-          onClick={() => logout()}
-          className="flex w-full items-center gap-3 rounded-[8px] py-3 pl-4 pr-3 text-left text-sm text-gray-400 hover:text-white"
+          onClick={() => void onSignOut()}
+          disabled={signingOut}
+          className="flex w-full items-center gap-3 rounded-[8px] py-3 pl-4 pr-3 text-left text-sm text-muted hover:text-text disabled:opacity-60"
         >
           <IconSignOut className="h-4 w-4 shrink-0 opacity-80" />
-          Sign out
+          {signingOut ? 'Signing out…' : 'Sign out'}
         </button>
       </nav>
     </aside>

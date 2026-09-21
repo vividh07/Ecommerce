@@ -92,4 +92,15 @@ export const productService = {
     if (!product) throw new ApiError(404, 'Product not found');
     return product;
   },
+
+  async adminGetProduct(productId) {
+    const product = await productRepository.findById(productId);
+    if (!product) throw new ApiError(404, 'Product not found');
+    const variants = await variantRepository.listByProduct(productId);
+    const { Product } = await import('../models/Product.js');
+    const populated = await Product.findById(product._id)
+      .populate('sellerId', 'storeName')
+      .populate('categoryId', 'name');
+    return { ...(populated?.toObject?.() ?? product.toObject()), variants };
+  },
 };

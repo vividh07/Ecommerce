@@ -37,6 +37,49 @@ export const productRepository = {
     ]);
     return { items, total };
   },
+  async countSellerStats(sellerId) {
+    const sellerObjectId =
+      sellerId instanceof mongoose.Types.ObjectId
+        ? sellerId
+        : new mongoose.Types.ObjectId(sellerId);
+
+    const [counts] = await Product.aggregate([
+      { $match: { sellerId: sellerObjectId, isDeleted: false } },
+      {
+        $lookup: {
+          from: 'productvariants',
+          localField: '_id',
+          foreignField: 'productId',
+          as: 'variants',
+        },
+      },
+      {
+        $addFields: {
+          totalStock: { $sum: '$variants.stock' },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          all: { $sum: 1 },
+          active: { $sum: { $cond: ['$isActive', 1, 0] } },
+          draft: { $sum: { $cond: ['$isActive', 0, 1] } },
+          outOfStock: {
+            $sum: {
+              $cond: [{ $lte: ['$totalStock', 0] }, 1, 0],
+            },
+          },
+        },
+      },
+    ]);
+
+    return {
+      all: counts?.all ?? 0,
+      active: counts?.active ?? 0,
+      draft: counts?.draft ?? 0,
+      outOfStock: counts?.outOfStock ?? 0,
+    };
+  },
   async searchCatalog({ q, categoryId, minPrice, maxPrice, minRating, sort, skip, limit }) {
     const pipeline = [];
 
@@ -129,6 +172,9 @@ export const variantRepository = {
   async update(id, productId, data) {
     return ProductVariant.findOneAndUpdate({ _id: id, productId }, data, { new: true });
   },
+  async updateStock(id, stock) {
+    return ProductVariant.findByIdAndUpdate(id, { stock }, { new: true });
+  },
   async delete(id, productId) {
     return ProductVariant.findOneAndDelete({ _id: id, productId });
   },
@@ -138,6 +184,37 @@ export const variantRepository = {
       { $inc: { stock: -quantity } },
       { new: true, session }
     );
+  },
+  async countLowStock(threshold = 5) {
+    return ProductVariant.countDocuments({ stock: { $lte: threshold } });
+  },
+  async inventoryRows() {
+    return ProductVariant.aggregate([
+      {
+        $lookup: {
+          from: 'products',
+          localField: 'productId',
+          foreignField: '_id',
+          as: 'product',
+        },
+      },
+      { $unwind: '$product' },
+      { $match: { 'product.isDeleted': false } },
+      {
+        $project: {
+          variantId: '$_id',
+          productId: '$productId',
+          name: '$product.name',
+          sku: '$sku',
+          stock: '$stock',
+          price: '$price',
+          attributes: '$attributes',
+          isActive: '$product.isActive',
+          updatedAt: '$updatedAt',
+        },
+      },
+      { $sort: { name: 1, sku: 1 } },
+    ]);
   },
 };
 

@@ -11,6 +11,34 @@ export type SellerProfile = {
   id: string;
   storeName: string;
   isApproved: boolean;
+  description?: string;
+  supportEmail?: string;
+  supportPhone?: string;
+  storeSlug?: string;
+  category?: string;
+  logoUrl?: string;
+  coverUrl?: string;
+  onboardingStep?: number;
+  onboardingComplete?: boolean;
+  pickupAddress?: {
+    line1?: string;
+    line2?: string;
+    city?: string;
+    state?: string;
+    postalCode?: string;
+    country?: string;
+  };
+  notifications?: {
+    orderUpdates?: boolean;
+    lowStock?: boolean;
+    returns?: boolean;
+    payouts?: boolean;
+  };
+  payoutDestination?: {
+    bankName?: string;
+    accountLast4?: string;
+    holderName?: string;
+  };
 };
 
 export type Category = {
