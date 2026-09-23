@@ -6,6 +6,7 @@ import { CartSwitcher } from '../components/cart/CartSwitcher';
 import { IconBookmark, IconTrash } from '../components/icons/Icons';
 import { Skeleton } from '../components/ui/Skeleton';
 import { formatINR } from '../lib/money';
+import { productImageSrc } from '../lib/productImage';
 import { useWishlist } from '../context/WishlistContext';
 import toast from 'react-hot-toast';
 
@@ -83,7 +84,7 @@ export function CartPage() {
                     <div className="flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-border bg-[#151515]">
                       {item.product.image ? (
                         <img
-                          src={item.product.image}
+                          src={productImageSrc(item.product.image)}
                           alt=""
                           className="h-full w-full object-contain p-2"
                         />

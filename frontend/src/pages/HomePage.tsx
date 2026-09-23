@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { api } from '../lib/api';
 import { formatINR } from '../lib/money';
+import { productImageSrc } from '../lib/productImage';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
@@ -84,7 +85,7 @@ function HomeProductCard({
   onWishlist: () => void;
   wishlisted: boolean;
 }) {
-  const image = product.images?.[0];
+  const image = productImageSrc(product.images?.[0]);
   return (
     <article className="group flex flex-col overflow-hidden rounded-[12px] border border-border bg-panel">
       <div className="relative aspect-square bg-tile">

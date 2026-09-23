@@ -8,6 +8,7 @@ import { Breadcrumbs } from '../components/layout/ShopNavbar';
 import { IconBag, IconBell, IconHeart } from '../components/icons/Icons';
 import { Skeleton } from '../components/ui/Skeleton';
 import { formatINR } from '../lib/money';
+import { productImageSrc } from '../lib/productImage';
 import type { Product } from '../types';
 
 type StockMap = Record<string, { inStock: boolean; color?: string; subtitle?: string }>;
@@ -86,7 +87,7 @@ export function WishlistPage() {
                   className="flex aspect-square shrink-0 items-center justify-center bg-[#151515] sm:w-[42%] sm:aspect-auto sm:min-h-[220px]"
                 >
                   <img
-                    src={p.images?.[0]}
+                    src={productImageSrc(p.images?.[0])}
                     alt=""
                     className="h-full w-full object-contain p-4"
                   />

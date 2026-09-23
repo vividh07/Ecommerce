@@ -6,6 +6,7 @@ import { Stepper } from '../../components/ui/Stepper';
 import { IconLock } from '../../components/icons/Icons';
 import { saveCheckoutDraft } from '../../lib/checkoutDraft';
 import { formatINR } from '../../lib/money';
+import { productImageSrc } from '../../lib/productImage';
 
 const steps = [
   { id: 'address', label: 'Address' },
@@ -205,7 +206,7 @@ export function CheckoutAddressPage() {
                 <li key={i.variantId} className="flex gap-3">
                   <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-[8px] bg-[#151515]">
                     {i.product.image && (
-                      <img src={i.product.image} alt="" className="h-full w-full object-contain p-1" />
+                      <img src={productImageSrc(i.product.image)} alt="" className="h-full w-full object-contain p-1" />
                     )}
                   </div>
                   <div className="min-w-0 flex-1">

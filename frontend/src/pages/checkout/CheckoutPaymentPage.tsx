@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { api } from '../../lib/api';
 import { formatINR } from '../../lib/money';
+import { productImageSrc } from '../../lib/productImage';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import { Breadcrumbs } from '../../components/layout/ShopNavbar';
@@ -222,7 +223,7 @@ export function CheckoutPaymentPage() {
             <li key={i.variantId} className="flex gap-3 text-sm">
               {i.product.image ? (
                 <img
-                  src={i.product.image}
+                  src={productImageSrc(i.product.image)}
                   alt=""
                   className="h-14 w-14 rounded-[8px] border border-border object-cover"
                 />

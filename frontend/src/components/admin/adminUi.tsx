@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { productImageSrc } from '../../lib/productImage';
 
 export function DemoBadge({ className = '' }: { className?: string }) {
   return (
@@ -134,7 +135,13 @@ export function Thumb({
   className?: string;
 }) {
   if (src) {
-    return <img src={src} alt={alt} className={`${className} rounded-[8px] border border-border object-cover`} />;
+    return (
+      <img
+        src={productImageSrc(src)}
+        alt={alt}
+        className={`${className} rounded-[8px] border border-border object-cover`}
+      />
+    );
   }
   return (
     <div

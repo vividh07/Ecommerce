@@ -7,6 +7,7 @@ import { useCart } from '../context/CartContext';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { Breadcrumbs } from '../components/layout/ShopNavbar';
 import { Skeleton } from '../components/ui/Skeleton';
+import { productImageSrc } from '../lib/productImage';
 
 type RoomState = {
   roomCode: string;
@@ -67,7 +68,9 @@ export function ShoppingRoomPage() {
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {state.shortlist.map((item) => (
           <article key={item.productId} className="card overflow-hidden">
-            {item.image && <img src={item.image} alt="" className="aspect-video w-full object-cover" />}
+            {item.image && (
+              <img src={productImageSrc(item.image)} alt="" className="aspect-video w-full object-cover" />
+            )}
             <div className="p-4">
               <p className="font-semibold">{item.name}</p>
               <p className="text-sm text-muted">▲ {item.votes.up} ▼ {item.votes.down}</p>

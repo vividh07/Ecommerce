@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { IconHeart } from '../icons/Icons';
 import { formatINR } from '../../lib/money';
+import { productImageSrc } from '../../lib/productImage';
 import type { Product } from '../../types';
 
 type Props = {
@@ -11,7 +12,7 @@ type Props = {
 };
 
 export function ProductCard({ product, categoryLabel = 'CATALOG', onWishlistToggle, wishlisted }: Props) {
-  const image = product.images?.[0];
+  const image = productImageSrc(product.images?.[0]);
   return (
     <article className="product-tile group">
       <Link to={`/product/${product._id}`} className="product-tile-image relative block overflow-hidden">

@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { api } from '../lib/api';
 import { formatINR } from '../lib/money';
+import { productImageSrc } from '../lib/productImage';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
@@ -84,7 +85,7 @@ export function ProductDetailPage() {
   }, [productId]);
 
   const variant = useMemo(() => variants.find((v) => v._id === selectedVariant), [variants, selectedVariant]);
-  const images = product?.images?.length ? product.images : [''];
+  const images = product?.images?.length ? product.images.map(productImageSrc) : [''];
   const variantAttrs = attrsToObject(variant?.attributes);
   const colorName = colorFromAttrs(variantAttrs);
   const colorVariants = useMemo(() => {
