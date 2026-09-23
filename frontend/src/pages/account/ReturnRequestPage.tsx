@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { api } from '../../lib/api';
 import { formatINR } from '../../lib/money';
@@ -10,11 +10,13 @@ import { Skeleton } from '../../components/ui/Skeleton';
 
 export function ReturnRequestPage() {
   const { orderId } = useParams();
+  const navigate = useNavigate();
   const [order, setOrder] = useState<Order | null>(null);
   const [reason, setReason] = useState('Size did not fit');
   const [notes, setNotes] = useState('');
   const [action, setAction] = useState<'return' | 'exchange'>('return');
   const [selected, setSelected] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (!orderId) return;
@@ -32,6 +34,31 @@ export function ReturnRequestPage() {
         year: 'numeric',
       })}`
     : 'Delivered';
+
+  async function submitReturn() {
+    if (!order || !item?.variantId) {
+      toast.error('Select an item to return');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await api.post(`/orders/${order._id}/return`, {
+        variantId: item.variantId,
+        reason,
+        notes,
+        action,
+      });
+      toast.success('Return request submitted');
+      navigate(`/orders/${order._id}`);
+    } catch (err: unknown) {
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        'Could not submit return request';
+      toast.error(msg);
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   return (
     <div className="mx-auto max-w-lg">
@@ -53,7 +80,7 @@ export function ReturnRequestPage() {
         <p className="mb-3 text-sm font-medium">Select item to return</p>
         <ul className="space-y-3">
           {order.items.map((row, idx) => (
-            <li key={idx}>
+            <li key={row.variantId ?? idx}>
               <button
                 type="button"
                 onClick={() => setSelected(idx)}
@@ -159,9 +186,10 @@ export function ReturnRequestPage() {
       <button
         type="button"
         className="btn-primary mt-4 w-full"
-        onClick={() => toast.success('Return request submitted')}
+        disabled={submitting}
+        onClick={() => void submitReturn()}
       >
-        Review return request →
+        {submitting ? 'Submitting…' : 'Submit return request →'}
       </button>
     </div>
   );

@@ -11,6 +11,7 @@ import {
 } from '../icons/Icons';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
+import { NotificationBell } from './NotificationBell';
 
 const PROMO_KEY = 'shop-promo-dismissed';
 
@@ -73,9 +74,9 @@ export function ShopNavbar() {
   const accountTo = user ? '/account/settings' : '/login';
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-black/95 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-border bg-bg/95 backdrop-blur-md">
       {promoVisible && (
-        <div className="relative border-b border-border bg-black px-4 py-2 text-center sm:px-6">
+        <div className="relative border-b border-border bg-bg px-4 py-2 text-center sm:px-6">
           <p className="text-xs text-muted sm:text-sm">Thoughtful finds. Everyday favourites.</p>
           <button
             type="button"
@@ -99,7 +100,7 @@ export function ShopNavbar() {
         </button>
 
         <Link to="/" className="wordmark shrink-0" onClick={() => setMobileOpen(false)}>
-          SHOP
+          LUMEN
         </Link>
 
         <nav className="hidden items-center gap-5 lg:flex">
@@ -119,12 +120,12 @@ export function ShopNavbar() {
                     <IconChevronDown className={`h-3.5 w-3.5 transition ${shopOpen ? 'rotate-180' : ''}`} />
                   </button>
                   {shopOpen && (
-                    <div className="absolute left-0 top-full z-50 mt-3 min-w-[180px] rounded-[12px] border border-border bg-[#111] py-2 shadow-xl">
+                    <div className="absolute left-0 top-full z-50 mt-3 min-w-[180px] rounded-[12px] border border-border bg-panel py-2 shadow-xl">
                       {SHOP_DROPDOWN.map((link) => (
                         <Link
                           key={link.to + link.label}
                           to={link.to}
-                          className="block px-4 py-2 text-sm text-muted transition hover:bg-white/5 hover:text-text"
+                          className="block px-4 py-2 text-sm text-muted transition hover:bg-hover-soft hover:text-text"
                           onClick={() => setShopOpen(false)}
                         >
                           {link.label}
@@ -163,23 +164,24 @@ export function ShopNavbar() {
         </div>
 
         <div className="ml-auto flex shrink-0 items-center gap-0.5">
+          <NotificationBell variant="shop" />
           <Link
             to={user ? '/wishlist' : '/login'}
-            className="rounded-full p-2.5 text-text transition hover:bg-white/5"
+            className="rounded-full p-2.5 text-text transition hover:bg-hover-soft"
             aria-label="Wishlist"
           >
             <IconHeart className="h-5 w-5" />
           </Link>
           <Link
             to={accountTo}
-            className="rounded-full p-2.5 text-text transition hover:bg-white/5"
+            className="rounded-full p-2.5 text-text transition hover:bg-hover-soft"
             aria-label="Account"
           >
             <IconUser className="h-5 w-5" />
           </Link>
           <Link
             to={user ? '/cart' : '/login'}
-            className="relative rounded-full p-2.5 text-text transition hover:bg-white/5"
+            className="relative rounded-full p-2.5 text-text transition hover:bg-hover-soft"
             aria-label="Cart"
           >
             <IconBag className="h-5 w-5" />
@@ -191,7 +193,7 @@ export function ShopNavbar() {
       </div>
 
       {mobileOpen && (
-        <div className="border-t border-border bg-black px-4 pb-5 pt-3 lg:hidden sm:px-6">
+        <div className="border-t border-border bg-bg px-4 pb-5 pt-3 lg:hidden sm:px-6">
           <div className="relative mb-4">
             <IconSearch className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
             <input
@@ -211,7 +213,7 @@ export function ShopNavbar() {
               <Link
                 key={link.to + link.label}
                 to={link.to}
-                className="rounded-lg px-3 py-2.5 text-sm text-text hover:bg-white/5"
+                className="rounded-lg px-3 py-2.5 text-sm text-text hover:bg-hover-soft"
                 onClick={() => setMobileOpen(false)}
               >
                 {link.label}
@@ -219,14 +221,14 @@ export function ShopNavbar() {
             ))}
             <Link
               to="/browse"
-              className="rounded-lg px-3 py-2.5 text-sm text-text hover:bg-white/5"
+                className="rounded-lg px-3 py-2.5 text-sm text-text hover:bg-hover-soft"
               onClick={() => setMobileOpen(false)}
             >
               Collections
             </Link>
             <Link
               to="/about"
-              className="rounded-lg px-3 py-2.5 text-sm text-text hover:bg-white/5"
+                className="rounded-lg px-3 py-2.5 text-sm text-text hover:bg-hover-soft"
               onClick={() => setMobileOpen(false)}
             >
               About

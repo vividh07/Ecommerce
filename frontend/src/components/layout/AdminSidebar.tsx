@@ -35,7 +35,7 @@ export function AdminSidebar() {
     <aside className="flex w-full flex-col border-b border-border bg-bg md:w-60 md:min-h-screen md:border-b-0 md:border-r">
       <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-4">
         <p className="wordmark text-[1.05rem] tracking-[0.35em]">
-          SHOP <span className="font-body text-[0.7rem] font-normal tracking-normal text-muted">| ADMIN</span>
+          LUMEN <span className="font-body text-[0.7rem] font-normal tracking-normal text-muted">| ADMIN</span>
         </p>
         <button
           type="button"

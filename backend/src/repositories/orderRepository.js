@@ -4,7 +4,7 @@ import { Order } from '../models/Order.js';
 export const orderRepository = {
   async create(data, session) {
     const order = new Order(data);
-    return order.save({ session });
+    return order.save(session ? { session } : undefined);
   },
   async findById(id, userId) {
     const filter = { _id: id, isDeleted: false };
@@ -14,11 +14,23 @@ export const orderRepository = {
   async findByIdAdmin(id) {
     return Order.findOne({ _id: id, isDeleted: false }).populate('userId', 'name email role');
   },
-  async findByPaymentIntent(paymentIntentId) {
-    return Order.findOne({ stripePaymentIntentId: paymentIntentId });
+  async findByRazorpayOrderId(razorpayOrderId) {
+    return Order.findOne({ razorpayOrderId, isDeleted: false });
+  },
+  async setRazorpayOrderId(orderId, razorpayOrderId, session) {
+    return Order.findByIdAndUpdate(
+      orderId,
+      { razorpayOrderId },
+      { new: true, session }
+    );
   },
   async listByUser(userId, { skip, limit }) {
-    const filter = { userId, isDeleted: false };
+    // Hide unpaid checkout drafts — only real payment outcomes (and refunds).
+    const filter = {
+      userId,
+      isDeleted: false,
+      paymentStatus: { $in: ['PAID', 'REFUNDED'] },
+    };
     const [items, total] = await Promise.all([
       Order.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
       Order.countDocuments(filter),
@@ -110,21 +122,32 @@ export const orderRepository = {
       },
     ]);
   },
-  async markPaid(orderId, session) {
-    return Order.findByIdAndUpdate(
-      orderId,
-      { paymentStatus: 'PAID' },
-      { new: true, session }
-    );
+  async markPaid(orderId, razorpayPaymentId, session) {
+    const update = { paymentStatus: 'PAID' };
+    if (razorpayPaymentId) update.razorpayPaymentId = razorpayPaymentId;
+    return Order.findByIdAndUpdate(orderId, update, { new: true, session });
   },
   async updateStatus(orderId, status, session) {
     return Order.findByIdAndUpdate(orderId, { status }, { new: true, session });
   },
-  async updatePaymentStatusByIntent(paymentIntentId, paymentStatus, session) {
+  async updatePaymentStatusByRazorpayOrder(razorpayOrderId, paymentStatus, session, orderId) {
+    const filter = orderId
+      ? { _id: orderId }
+      : { razorpayOrderId };
+    const update = { paymentStatus };
+    if (paymentStatus === 'FAILED') {
+      update.status = 'CANCELLED';
+    }
+    return Order.findOneAndUpdate(filter, update, { new: true, session });
+  },
+  async cancelUnpaid(orderId) {
     return Order.findOneAndUpdate(
-      { stripePaymentIntentId: paymentIntentId },
-      { paymentStatus },
-      { new: true, session }
+      {
+        _id: orderId,
+        paymentStatus: { $in: ['PENDING', 'FAILED'] },
+      },
+      { paymentStatus: 'FAILED', status: 'CANCELLED' },
+      { new: true }
     );
   },
 };

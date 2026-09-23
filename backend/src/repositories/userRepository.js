@@ -10,6 +10,12 @@ export const userRepository = {
   async findById(id) {
     return User.findOne({ _id: id, isDeleted: false });
   },
+  async findByGoogleId(googleId) {
+    return User.findOne({ googleId, isDeleted: false });
+  },
+  async linkGoogle(id, googleId) {
+    return User.findByIdAndUpdate(id, { googleId }, { new: true });
+  },
   async updateRefreshToken(id, refreshTokenHash) {
     return User.findByIdAndUpdate(id, { refreshTokenHash }, { new: true });
   },
@@ -23,5 +29,20 @@ export const userRepository = {
       User.countDocuments(filter),
     ]);
     return { items, total };
+  },
+  async pushNotification(userId, notification) {
+    return User.findByIdAndUpdate(
+      userId,
+      {
+        $push: {
+          notifications: {
+            $each: [notification],
+            $position: 0,
+            $slice: 50,
+          },
+        },
+      },
+      { new: true }
+    );
   },
 };

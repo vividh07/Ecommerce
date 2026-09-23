@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { api } from '../../lib/api';
@@ -49,6 +49,8 @@ export function ProductEditorPage() {
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     api
@@ -109,18 +111,46 @@ export function ProductEditorPage() {
         categoryId: form.categoryId,
         isActive: publish ? true : form.isActive,
       };
+      let id = productId;
       if (isNew) {
         const res = await api.post('/products', payload);
-        const id = res.data.data?._id;
+        id = res.data.data?._id;
+        if (!id) throw new Error('no id');
+        await api.post(`/products/${id}/variants`, {
+          attributes: {},
+          price: payload.basePrice,
+          stock: Math.max(0, Number(form.stock) || 0),
+          sku: (form.sku || `SKU-${String(id).slice(-6)}`).toUpperCase(),
+        });
         toast.success(publish ? 'Product published' : 'Draft saved');
-        navigate(id ? `/seller/products/${id}` : '/seller/products');
+        navigate(`/seller/products/${id}`);
       } else {
         await api.patch(`/products/${productId}`, payload);
+        const variants = form.variants ?? [];
+        if (variants.length === 0) {
+          await api.post(`/products/${productId}/variants`, {
+            attributes: {},
+            price: payload.basePrice,
+            stock: Math.max(0, Number(form.stock) || 0),
+            sku: (form.sku || `SKU-${String(productId).slice(-6)}`).toUpperCase(),
+          });
+        } else {
+          // Inventory "Quantity" maps to the first variant (multi-variant table stays display-only for now).
+          const primary = variants[0];
+          await api.patch(`/products/${productId}/variants/${primary._id}`, {
+            stock: Math.max(0, Number(form.stock) || 0),
+            sku: (form.sku || primary.sku).toUpperCase(),
+            price: payload.basePrice,
+          });
+        }
         setForm((f) => ({ ...f, isActive: payload.isActive }));
         toast.success(publish ? 'Changes published' : 'Draft saved');
       }
-    } catch {
-      toast.error('Could not save product');
+    } catch (err: unknown) {
+      const message =
+        (err as { response?: { data?: { message?: string; details?: unknown } } })?.response?.data
+          ?.message ?? 'Could not save product';
+      toast.error(message);
     } finally {
       setSaving(false);
     }
@@ -129,8 +159,52 @@ export function ProductEditorPage() {
   function addImage() {
     const url = imageUrl.trim();
     if (!url) return;
-    setForm((f) => ({ ...f, images: [...f.images, url] }));
+    setForm((f) => ({ ...f, images: [...f.images, url].slice(0, 10) }));
     setImageUrl('');
+  }
+
+  function removeImage(index: number) {
+    setForm((f) => ({ ...f, images: f.images.filter((_, i) => i !== index) }));
+  }
+
+  async function onFilesSelected(files: FileList | null) {
+    if (!files?.length) return;
+    const remaining = 10 - form.images.length;
+    if (remaining <= 0) {
+      toast.error('Maximum 10 images');
+      return;
+    }
+    const selected = Array.from(files).slice(0, remaining);
+    for (const file of selected) {
+      if (!file.type.startsWith('image/')) {
+        toast.error(`${file.name} is not an image`);
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error(`${file.name} exceeds 10 MB`);
+        return;
+      }
+    }
+
+    const body = new FormData();
+    selected.forEach((file) => body.append('images', file));
+
+    setUploading(true);
+    try {
+      const res = await api.post('/uploads/product-images', body);
+      const urls: string[] = res.data.data?.urls ?? [];
+      if (!urls.length) throw new Error('empty');
+      setForm((f) => ({ ...f, images: [...f.images, ...urls].slice(0, 10) }));
+      toast.success(urls.length === 1 ? 'Image uploaded' : `${urls.length} images uploaded`);
+    } catch (err: unknown) {
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+        'Upload failed';
+      toast.error(message);
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
   }
 
   if (loading) return <Skeleton className="h-96 w-full !bg-[#e5e5e5]" />;
@@ -196,29 +270,64 @@ export function ProductEditorPage() {
 
           <SellerCard className="p-5">
             <label className="text-sm font-medium">Media</label>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              multiple
+              className="hidden"
+              onChange={(e) => onFilesSelected(e.target.files)}
+            />
             <div className="mt-3 grid gap-3 sm:grid-cols-[1.2fr_1fr]">
-              <div className="flex aspect-square items-center justify-center overflow-hidden rounded-[10px] border border-[#e5e5e5] bg-[#fafafa]">
+              <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-[10px] border border-[#e5e5e5] bg-[#fafafa]">
                 {form.images[0] ? (
-                  <img src={form.images[0]} alt="" className="h-full w-full object-cover" />
+                  <>
+                    <img src={form.images[0]} alt="" className="h-full w-full object-cover" />
+                    <button
+                      type="button"
+                      className="absolute right-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-[11px] text-white"
+                      onClick={() => removeImage(0)}
+                    >
+                      Remove
+                    </button>
+                  </>
                 ) : (
                   <span className="text-sm text-[#9ca3af]">No image</span>
                 )}
               </div>
               <div className="grid grid-cols-2 gap-2 content-start">
-                {form.images.slice(1, 5).map((src) => (
-                  <img key={src} src={src} alt="" className="aspect-square rounded-[8px] border border-[#e5e5e5] object-cover" />
+                {form.images.slice(1, 5).map((src, i) => (
+                  <div key={`${src}-${i}`} className="relative aspect-square">
+                    <img
+                      src={src}
+                      alt=""
+                      className="h-full w-full rounded-[8px] border border-[#e5e5e5] object-cover"
+                    />
+                    <button
+                      type="button"
+                      className="absolute right-1 top-1 rounded-full bg-black/60 px-1.5 py-0.5 text-[10px] text-white"
+                      onClick={() => removeImage(i + 1)}
+                    >
+                      ×
+                    </button>
+                  </div>
                 ))}
-                <div className="flex aspect-square flex-col items-center justify-center rounded-[8px] border border-dashed border-[#d4d4d4] bg-[#fafafa] p-2 text-center text-[11px] text-[#6b7280]">
+                <button
+                  type="button"
+                  disabled={uploading || form.images.length >= 10}
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex aspect-square flex-col items-center justify-center rounded-[8px] border border-dashed border-[#d4d4d4] bg-[#fafafa] p-2 text-center text-[11px] text-[#6b7280] transition hover:border-[#111] hover:text-[#111] disabled:opacity-50"
+                >
                   <IconPlus className="mb-1 h-4 w-4" />
-                  Upload images
+                  {uploading ? 'Uploading…' : 'Upload images'}
                   <span className="mt-0.5 text-[10px] text-[#9ca3af]">JPG, PNG · Max 10 MB</span>
-                </div>
+                </button>
               </div>
             </div>
             <div className="mt-3 flex gap-2">
               <input
                 className={sellerInputClass()}
-                placeholder="Paste image URL"
+                placeholder="Or paste image URL"
                 value={imageUrl}
                 onChange={(e) => setImageUrl(e.target.value)}
               />

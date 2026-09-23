@@ -11,3 +11,10 @@ export const sellerStatusUpdateSchema = z.object({
   ]),
   note: z.string().max(500).optional().default(''),
 });
+
+export const returnRequestSchema = z.object({
+  variantId: z.string().min(1),
+  reason: z.string().min(2).max(200),
+  notes: z.string().max(500).optional().default(''),
+  action: z.enum(['return', 'exchange']).optional().default('return'),
+});

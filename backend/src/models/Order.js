@@ -67,7 +67,8 @@ const orderSchema = new mongoose.Schema(
     },
     status: { type: String, enum: ORDER_STATUSES, default: 'PLACED' },
     paymentStatus: { type: String, enum: PAYMENT_STATUSES, default: 'PENDING' },
-    stripePaymentIntentId: { type: String, default: null },
+    razorpayOrderId: { type: String, default: null },
+    razorpayPaymentId: { type: String, default: null },
     subtotalAmount: { type: Number, required: true, min: 0 },
     discountAmount: { type: Number, default: 0, min: 0 },
     couponCode: { type: String, default: null },
@@ -81,7 +82,8 @@ const orderSchema = new mongoose.Schema(
 );
 
 orderSchema.index({ userId: 1, createdAt: -1 });
-orderSchema.index({ stripePaymentIntentId: 1 });
+orderSchema.index({ razorpayOrderId: 1 });
+orderSchema.index({ razorpayPaymentId: 1 });
 orderSchema.index({ 'items.sellerId': 1, createdAt: -1 });
 
 export const Order = mongoose.model('Order', orderSchema);

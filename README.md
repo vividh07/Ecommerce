@@ -1,80 +1,173 @@
-# Nexus Market — Multi-Vendor Ecommerce (Phase 1)
+# LUMEN
 
-Portfolio-grade multi-vendor storefront with JWT auth, Stripe checkout (test mode), seller and admin dashboards, and a futuristic React UI.
+Multi-vendor ecommerce storefront — shop, seller center, and admin — built as a portfolio project.
 
-## Stack
+Customers browse a curated catalog, check out with **Razorpay** (test mode), track orders, and request returns. Sellers manage products and fulfilment. Admins approve stores and run the catalog.
 
-- **Backend:** Node.js, Express, Mongoose, Stripe, JWT (access + refresh)
-- **Frontend:** React, Vite, Tailwind CSS v4, Framer Motion, Stripe Elements
-- **Database:** MongoDB (Atlas recommended for production)
+**Live stack:** React 19 + Vite + Tailwind · Express + MongoDB · JWT · Socket.IO · Razorpay · Google sign-in
 
-## Quick start
+---
 
-### 1. MongoDB
+## Features
 
-Use [MongoDB Atlas](https://www.mongodb.com/atlas) or local MongoDB. For local development without Mongo installed, the backend supports in-memory MongoDB:
+**Storefront**
+- Catalog browse, search, product detail, wishlist
+- Multi-cart, compare, coupons
+- Razorpay checkout (cards / UPI / wallets in test mode)
+- Orders, delivery confirm, returns
+- Addresses, account settings, light / dark theme
+- Shopping rooms (live) and post-purchase dashboard
+- Google sign-in and email + OTP password reset
 
-```bash
-USE_IN_MEMORY_MONGO=true
+**Seller** (`/seller`)
+- Onboarding, products, orders, returns, payouts, settings
+
+**Admin** (`/admin`)
+- Overview, catalog, inventory, customers, discounts, returns, reports, store settings
+
+---
+
+## Tech stack
+
+| Layer | Tools |
+| --- | --- |
+| Frontend | React 19, Vite, TypeScript, Tailwind CSS v4, Socket.IO client |
+| Backend | Node.js, Express, Mongoose, Zod, Helmet, rate limits |
+| Auth | JWT (access + refresh), Google OAuth, bcrypt |
+| Payments | Razorpay Checkout + optional webhooks |
+| Realtime | Socket.IO (order updates, shopping rooms) |
+| Email | Resend (optional; sandbox only delivers to your Resend account) |
+| Database | MongoDB Atlas (or in-memory Mongo for demos) |
+
+---
+
+## Project layout
+
+```
+backend/     Express API (port 4871)
+frontend/    Vite + React app (port 5174)
 ```
 
-### 2. Backend
+---
+
+## Local setup
+
+**Requirements:** Node.js 20+, npm, and a MongoDB URI (Atlas or local).
+
+### 1. Clone and install
 
 ```bash
-cd backend
-cp .env.example .env
-# Set JWT secrets (32+ chars), STRIPE_SECRET_KEY, CLIENT_URL, MONGODB_URI
-npm install
-npm run seed   # demo users + catalog
-npm run dev    # http://127.0.0.1:4871
+git clone https://github.com/vividh07/Ecommerce.git
+cd Ecommerce
+
+npm install --prefix backend
+npm install --prefix frontend
 ```
 
-### 3. Frontend
+### 2. Environment
 
 ```bash
-cd frontend
-cp .env.example .env
-# Set VITE_STRIPE_PUBLISHABLE_KEY (pk_test_...)
-npm install
-npm run dev    # http://127.0.0.1:5174 (proxies /api → backend)
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
 ```
 
-### Demo accounts (after seed)
+Fill in JWT secrets (32+ characters), `MONGODB_URI`, Razorpay **test** keys, and (optionally) Google + Resend.
 
-| Role     | Email              | Password      |
-|----------|--------------------|---------------|
-| Admin    | admin@demo.shop    | Password123!  |
-| Seller   | seller@demo.shop   | Password123!  |
-| Customer | customer@demo.shop | Password123!  |
+Keep `USE_IN_MEMORY_MONGO` unset or `false` if you want data to persist. Set it `true` only for a throwaway demo DB (wiped on restart).
 
-## Stripe
-
-1. Create a [Stripe test](https://dashboard.stripe.com/test/apikeys) secret + publishable key.
-2. Set `STRIPE_SECRET_KEY` and `VITE_STRIPE_PUBLISHABLE_KEY`.
-3. For webhooks locally, use the Stripe CLI:
+### 3. Seed and run
 
 ```bash
-stripe listen --forward-to localhost:4871/api/webhooks/stripe
+npm run seed --prefix backend
+npm run dev --prefix backend    # http://127.0.0.1:4871
+npm run dev --prefix frontend   # http://127.0.0.1:5174
 ```
 
-Set `STRIPE_WEBHOOK_SECRET` from the CLI output. Payment success webhooks finalize orders and deduct stock inside a MongoDB transaction.
+The Vite app proxies `/api` and `/uploads` to the API.
 
-## API overview
+Seed loads `Data/products.json` when that folder exists locally (`Data/` is gitignored). Otherwise it falls back to a built-in demo catalog.
 
-- `POST /api/auth/register|login|refresh`
-- `GET /api/catalog/products` — search, filters, pagination
-- `GET /api/cart`, checkout via `POST /api/checkout/payment-intent`
-- Seller: `GET/POST /api/products`, variants, `GET /api/orders/seller/mine`
-- Admin: `GET /api/admin/sellers/pending`, approve/reject
+---
 
-## Phase scope
+## Demo accounts
 
-**Phase 2** adds wishlist, coupons at checkout, order tracking with status history and Socket.io updates, named multi-carts with budgets, and cart duplicate/compare.
+Password for all seeded password accounts: `Password123!`
 
-**Phase 3** adds real-time Shopping Rooms (Socket.io) and the post-purchase dashboard (`/dashboard`).
+| Role | Email |
+| --- | --- |
+| Admin | `admin@demo.shop` |
+| Customer | `customer@demo.shop` |
+| Seller | `studio-supply@demo.shop` |
 
-## Deployment
+Coupon: `SAVE10` (10% off).
 
-- **API:** Render (set env vars, expose port `4871` or `PORT`)
-- **Web:** Vercel (`frontend`, set `VITE_API_URL` to your API origin)
-- **DB:** MongoDB Atlas free tier
+---
+
+## Environment variables
+
+### Backend (`backend/.env`)
+
+| Variable | Purpose |
+| --- | --- |
+| `MONGODB_URI` | Atlas or local Mongo connection string |
+| `USE_IN_MEMORY_MONGO` | `true` = ephemeral in-memory DB |
+| `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` | Token signing (32+ chars, unique) |
+| `CLIENT_URL` | Frontend origin (CORS + Socket.IO) |
+| `PORT` | API port (default `4871`) |
+| `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` | Razorpay test keys |
+| `RAZORPAY_WEBHOOK_SECRET` | Optional webhook verify |
+| `RESEND_API_KEY` / `RESEND_FROM` | Optional password-reset email |
+
+### Frontend (`frontend/.env`)
+
+| Variable | Purpose |
+| --- | --- |
+| `VITE_API_URL` | API base (`/api` locally via proxy, or `https://your-api/api` in prod) |
+| `VITE_SOCKET_URL` | Socket.IO origin |
+| `VITE_RAZORPAY_KEY_ID` | Razorpay Key ID (`rzp_test_...`) |
+| `VITE_GOOGLE_CLIENT_ID` | Google OAuth client ID |
+
+---
+
+## Payments
+
+1. Create [Razorpay test keys](https://dashboard.razorpay.com/app/keys).
+2. Set them on the API and `VITE_RAZORPAY_KEY_ID` on the web app.
+3. Checkout: `POST /api/checkout/create-order` → Razorpay Checkout → `POST /api/checkout/verify`.
+4. Optional webhook: `POST /api/webhooks/razorpay` (`payment.captured` / `payment.failed`).
+
+---
+
+## Deploy (portfolio)
+
+Typical split:
+
+- **API** — Render (or similar). Start: `npm start` in `backend`. Set `PORT` from the host. `CLIENT_URL` must be the **exact** frontend origin.
+- **Web** — Vercel, root `frontend`. Set `VITE_API_URL` to `https://<your-api>/api` and `VITE_SOCKET_URL` to `https://<your-api>`.
+- **DB** — MongoDB Atlas. Allow the host IPs (or `0.0.0.0/0` for a public demo).
+
+Also add the production URL to Google OAuth **Authorized JavaScript origins**.
+
+**Notes**
+- Seller image uploads write to the API disk (`/uploads`). On free hosts that disk resets on deploy/restart. Seeded images under `frontend/public` are fine.
+- Password-reset email via Resend’s sandbox only delivers to the Resend account email.
+
+---
+
+## Scripts
+
+| Command | Where | What |
+| --- | --- | --- |
+| `npm run dev` | `backend` | API with nodemon |
+| `npm start` | `backend` | API (production) |
+| `npm run seed` | `backend` | Demo users + catalog |
+| `npm run dev` | `frontend` | Vite dev server |
+| `npm run build` | `frontend` | Typecheck + production build |
+
+From the repo root you can also use `npm run seed`, `npm run dev:api`, and `npm run dev:web`.
+
+---
+
+## Author
+
+[Vividh Choudhary](https://github.com/vividh07) · [LinkedIn](https://www.linkedin.com/in/vividh-choudhary/)

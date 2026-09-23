@@ -86,8 +86,8 @@ function HomeProductCard({
 }) {
   const image = product.images?.[0];
   return (
-    <article className="group flex flex-col overflow-hidden rounded-[12px] border border-border bg-[#111]">
-      <div className="relative aspect-square bg-[#151515]">
+    <article className="group flex flex-col overflow-hidden rounded-[12px] border border-border bg-panel">
+      <div className="relative aspect-square bg-tile">
         <Link to={`/product/${product._id}`} className="block h-full w-full">
           {image ? (
             <img
@@ -197,7 +197,7 @@ export function HomePage() {
   }
 
   return (
-    <div className="bg-black text-text">
+    <div className="bg-bg text-text">
       {/* Hero */}
       <section className="relative min-h-[calc(100vh-120px)] overflow-hidden md:min-h-[calc(100vh-110px)]">
         <img
@@ -209,7 +209,7 @@ export function HomePage() {
         <VerticalLabel text="GOOD THINGS GO FURTHER" />
 
         <div className="relative z-10 mx-auto flex min-h-[calc(100vh-120px)] max-w-[1600px] flex-col justify-center px-4 py-16 sm:px-6 lg:px-10 md:min-h-[calc(100vh-110px)]">
-          <h1 className="page-title max-w-xl text-[clamp(2.75rem,8vw,5.5rem)]">
+          <h1 className="page-title max-w-xl text-[clamp(2.75rem,8vw,5.5rem)] !text-white">
             Good things.
             <br />
             Every day.
@@ -229,7 +229,7 @@ export function HomePage() {
       </section>
 
       {/* Value bar */}
-      <section className="border-y border-border bg-[#111]">
+      <section className="border-y border-border bg-panel">
         <div className="mx-auto grid max-w-[1600px] gap-6 px-4 py-8 sm:px-6 md:grid-cols-3 lg:px-10">
           {VALUE_ITEMS.map((item) => (
             <div key={item.title} className="flex gap-4">
@@ -256,9 +256,9 @@ export function HomePage() {
             <Link
               key={cat.name}
               to={cat.to}
-              className="group relative flex flex-col overflow-hidden rounded-[12px] border border-border bg-[#111] transition hover:border-white/20"
+              className="group relative flex flex-col overflow-hidden rounded-[12px] border border-border bg-panel transition hover:border-border-strong"
             >
-              <div className="aspect-[4/3] bg-[#151515] p-6">
+              <div className="aspect-[4/3] bg-tile p-6">
                 <img
                   src={cat.image}
                   alt={cat.name}
@@ -313,7 +313,7 @@ export function HomePage() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_50%,rgba(232,93,4,0.15),transparent_55%)]" />
         <VerticalLabel text="A CALMER HAPPIER YOU" />
         <div className="relative z-10 mx-auto max-w-[1600px] px-4 py-24 sm:px-6 lg:px-10 lg:py-32">
-          <h2 className="page-title max-w-lg text-[clamp(2.5rem,6vw,4.5rem)]">Make room for better.</h2>
+          <h2 className="page-title max-w-lg text-[clamp(2.5rem,6vw,4.5rem)] !text-white">Make room for better.</h2>
           <p className="mt-5 max-w-md text-base text-white/75">
             Everyday objects, made extraordinary. Thoughtful design for a more intentional home.
           </p>
@@ -355,7 +355,7 @@ export function HomePage() {
         <div className="absolute inset-0 bg-black/70" />
         <VerticalLabel text="BETTER OBJECTS BRIGHTER DAYS" />
         <div className="relative z-10 mx-auto max-w-[1600px] px-4 py-24 text-center sm:px-6 lg:px-10 lg:py-28">
-          <h2 className="page-title mx-auto max-w-3xl text-[clamp(2.25rem,5vw,4rem)]">
+          <h2 className="page-title mx-auto max-w-3xl text-[clamp(2.25rem,5vw,4rem)] !text-white">
             Less noise. More good finds.
           </h2>
           <p className="mx-auto mt-5 max-w-lg text-base text-white/75">
@@ -363,7 +363,7 @@ export function HomePage() {
             matters.
           </p>
           <Link to="/about" className="btn-primary mt-8 inline-flex px-6 py-3.5">
-            About SHOP <IconChevronRight className="h-4 w-4" />
+            About LUMEN <IconChevronRight className="h-4 w-4" />
           </Link>
         </div>
       </section>
@@ -396,7 +396,7 @@ export function HomePage() {
                 onChange={(e) => setAgreed(e.target.checked)}
                 className="mt-0.5 accent-accent"
               />
-              <span>I agree to receive emails from SHOP. You can unsubscribe at any time.</span>
+              <span>I agree to receive emails from LUMEN. You can unsubscribe at any time.</span>
             </label>
           </form>
         </div>

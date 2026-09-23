@@ -85,7 +85,7 @@ export function ContactPage() {
       </div>
 
       <div className="mt-12 grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-10">
-        <form onSubmit={onSubmit} className="rounded-[12px] border border-border bg-[#111] p-6 sm:p-8">
+        <form onSubmit={onSubmit} className="rounded-[12px] border border-border bg-panel p-6 sm:p-8">
           <h2 className="text-lg font-semibold">Send us a message</h2>
 
           <div className="mt-6 space-y-4">
@@ -163,7 +163,7 @@ export function ContactPage() {
           {INFO_CARDS.map((card) => (
             <div
               key={card.title}
-              className="flex overflow-hidden rounded-[12px] border border-border bg-[#111]"
+              className="flex overflow-hidden rounded-[12px] border border-border bg-panel"
             >
               <div className="flex flex-1 flex-col justify-center p-5">
                 <h3 className="font-semibold">{card.title}</h3>

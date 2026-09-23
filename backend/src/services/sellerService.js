@@ -6,6 +6,7 @@ import { userRepository } from '../repositories/userRepository.js';
 import { orderRepository } from '../repositories/orderRepository.js';
 import { orderStatusHistoryRepository } from '../repositories/orderStatusHistoryRepository.js';
 import { productRepository } from '../repositories/productRepository.js';
+import { returnRequestRepository } from '../repositories/returnRequestRepository.js';
 import { Order } from '../models/Order.js';
 import { Product } from '../models/Product.js';
 
@@ -208,10 +209,7 @@ export const sellerService = {
           $elemMatch: { sellerId: sid, status: { $in: ['PLACED', 'CONFIRMED'] } },
         },
       }),
-      Order.countDocuments({
-        ...sellerItemMatch,
-        $or: [{ status: 'RETURNED' }, { paymentStatus: 'REFUNDED' }],
-      }),
+      returnRequestRepository.countOpenBySeller(seller._id),
       Order.find(sellerItemMatch)
         .sort({ createdAt: -1 })
         .limit(8)
@@ -295,7 +293,10 @@ export const sellerService = {
   async listOrders(userId, query) {
     const seller = await requireApprovedSeller(userId);
     const { page, limit, skip } = parsePagination(query);
-    const extraFilter = buildSellerOrderSearchFilter(seller._id, query);
+    const extraFilter = {
+      paymentStatus: 'PAID',
+      ...buildSellerOrderSearchFilter(seller._id, query),
+    };
     const { items, total } = await orderRepository.listBySeller(seller._id, {
       skip,
       limit,
@@ -339,31 +340,35 @@ export const sellerService = {
   async listReturns(userId, query) {
     const seller = await requireApprovedSeller(userId);
     const { page, limit, skip } = parsePagination(query);
-    const filter = {
-      $or: [{ status: 'RETURNED' }, { paymentStatus: 'REFUNDED' }],
-    };
-    const { items, total } = await orderRepository.listBySeller(seller._id, {
+    const { items, total } = await returnRequestRepository.listBySeller(seller._id, {
       skip,
       limit,
-      filter,
     });
 
-    const returns = items.map((order) => {
-      const obj = order.toObject ? order.toObject() : order;
+    const imageByProductId = await loadProductImages(items.map((r) => r.productId));
+
+    const returns = items.map((doc) => {
+      const obj = doc.toObject ? doc.toObject() : doc;
       const customer = obj.userId;
-      const itemsMine = sellerItems(obj, seller._id);
-      const refundShare = sellerShare(obj, seller._id);
+      const idStr = obj._id.toString();
       return {
-        returnId: `RET-${obj._id.toString().slice(-6).toUpperCase()}`,
-        orderId: obj._id,
-        orderNumber: orderNumberFromId(obj._id),
-        productName: itemsMine.map((i) => i.productName).join(', ') || 'Order items',
+        returnId: idStr,
+        displayId: `RET-${idStr.slice(-6).toUpperCase()}`,
+        orderId: obj.orderId,
+        orderNumber: orderNumberFromId(obj.orderId),
+        productName: obj.productName,
+        variantLabel: obj.variantLabel || '',
+        reason: obj.reason,
+        note: obj.notes || '',
+        image: imageByProductId.get(obj.productId?.toString?.() ?? String(obj.productId)) || null,
+        price: obj.lineTotal,
         customer: customer
           ? { _id: customer._id, name: customer.name, email: customer.email }
           : null,
-        requestedAt: obj.updatedAt || obj.createdAt,
-        status: obj.status === 'RETURNED' ? 'RETURNED' : 'REFUNDED',
-        refundAmount: obj.paymentStatus === 'REFUNDED' ? refundShare : 0,
+        requestedAt: obj.createdAt,
+        status: obj.status,
+        refundAmount: obj.refundAmount ?? 0,
+        action: obj.action,
       };
     });
 

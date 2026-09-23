@@ -34,6 +34,7 @@ router.get(
   validate(sellerPaginationQuerySchema, 'query'),
   asyncHandler(sellerController.listReturns)
 );
+router.patch('/returns/:returnId/approve', asyncHandler(sellerController.approveReturn));
 router.get('/payouts', asyncHandler(sellerController.payouts));
 router.get('/product-stats', asyncHandler(sellerController.productStats));
 

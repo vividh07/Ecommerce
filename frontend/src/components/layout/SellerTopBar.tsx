@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
-import { IconBell, IconExternal, IconSearch } from '../icons/Icons';
+import { IconExternal, IconSearch } from '../icons/Icons';
 import { sellerBtnPrimary } from '../seller/sellerUi';
+import { NotificationBell } from './NotificationBell';
 
 export function SellerTopBar({ placeholder = 'Search orders, products, customers...' }: { placeholder?: string }) {
   return (
@@ -13,14 +14,7 @@ export function SellerTopBar({ placeholder = 'Search orders, products, customers
         />
       </div>
       <div className="flex items-center gap-2.5">
-        <button
-          type="button"
-          className="relative rounded-[10px] border border-[#e5e5e5] bg-white p-2.5 text-[#6b7280] hover:text-[#111]"
-          aria-label="Notifications"
-        >
-          <IconBell className="h-4 w-4" />
-          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-[#ef4444]" />
-        </button>
+        <NotificationBell variant="seller" />
         <Link to="/browse" className={sellerBtnPrimary('!py-2.5')}>
           Visit store
           <IconExternal className="h-3.5 w-3.5" />

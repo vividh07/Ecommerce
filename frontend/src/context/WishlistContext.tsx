@@ -23,13 +23,15 @@ type WishlistState = {
 const WishlistContext = createContext<WishlistState | null>(null);
 
 export function WishlistProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(() => Boolean(localStorage.getItem('accessToken')));
 
   const refresh = useCallback(async () => {
+    if (authLoading) return;
     if (!user) {
       setProducts([]);
+      setLoading(false);
       return;
     }
     setLoading(true);
@@ -41,7 +43,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, authLoading]);
 
   useEffect(() => {
     refresh();
@@ -75,8 +77,15 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo(
-    () => ({ products, loading, refresh, isWishlisted, toggle, moveToCart }),
-    [products, loading, refresh, isWishlisted, toggle, moveToCart]
+    () => ({
+      products,
+      loading: loading || authLoading,
+      refresh,
+      isWishlisted,
+      toggle,
+      moveToCart,
+    }),
+    [products, loading, authLoading, refresh, isWishlisted, toggle, moveToCart]
   );
 
   return <WishlistContext.Provider value={value}>{children}</WishlistContext.Provider>;

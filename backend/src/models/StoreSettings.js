@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const storeSettingsSchema = new mongoose.Schema(
   {
-    storeName: { type: String, default: 'Nexus Market', trim: true },
+    storeName: { type: String, default: 'LUMEN', trim: true },
     supportEmail: { type: String, default: 'support@demo.shop', trim: true, lowercase: true },
     currency: { type: String, default: 'INR', trim: true },
     timezone: { type: String, default: 'Asia/Kolkata', trim: true },

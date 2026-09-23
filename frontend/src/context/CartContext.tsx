@@ -19,6 +19,7 @@ type CartState = {
   cart: Cart;
   activeCartId: string | null;
   loading: boolean;
+  ready: boolean;
   itemCount: number;
   refresh: () => Promise<void>;
   selectCart: (cartId: string) => void;
@@ -42,12 +43,13 @@ const emptyCart: Cart = {
 };
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [carts, setCarts] = useState<Cart[]>([]);
-  const [activeCartId, setActiveCartId] = useState<string | null>(
+  const [activeCartId, setActiveCartId] = useState<string | null>(() =>
     localStorage.getItem(ACTIVE_KEY)
   );
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(() => Boolean(localStorage.getItem('accessToken')));
+  const [ready, setReady] = useState(false);
 
   const cart = useMemo(
     () => carts.find((c) => c.id === activeCartId) ?? carts[0] ?? null,
@@ -55,27 +57,39 @@ export function CartProvider({ children }: { children: ReactNode }) {
   );
 
   const refresh = useCallback(async () => {
+    // Wait until auth bootstrap finishes so we don't treat "still loading" as logged out.
+    if (authLoading) return;
+
     if (!user) {
       setCarts([]);
+      setActiveCartId(null);
+      localStorage.removeItem(ACTIVE_KEY);
+      setLoading(false);
+      setReady(true);
       return;
     }
+
     setLoading(true);
     try {
       const res = await api.get('/carts');
       const list: Cart[] = res.data.data ?? [];
       setCarts(list);
       const stored = localStorage.getItem(ACTIVE_KEY);
-      const valid = list.find((c) => c.id === stored) ?? list[0];
+      const valid = list.find((c) => c.id === stored) ?? list[0] ?? null;
       if (valid) {
         setActiveCartId(valid.id);
         localStorage.setItem(ACTIVE_KEY, valid.id);
+      } else {
+        setActiveCartId(null);
+        localStorage.removeItem(ACTIVE_KEY);
       }
     } catch {
       setCarts([]);
     } finally {
       setLoading(false);
+      setReady(true);
     }
-  }, [user]);
+  }, [user, authLoading]);
 
   useEffect(() => {
     refresh();
@@ -112,14 +126,27 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addItem = useCallback(
     async (variantId: string, quantity = 1) => {
-      const id = activeCartId ?? cart?.id;
-      if (!id) return;
+      let id: string | null | undefined = activeCartId ?? cart?.id;
+      if (!id) {
+        await refresh();
+        id = localStorage.getItem(ACTIVE_KEY);
+      }
+      if (!id) {
+        toast.error('Cart is still loading — try again');
+        return;
+      }
       const res = await api.post(`/carts/${id}/items`, { variantId, quantity });
       const updated: Cart = res.data.data;
-      setCarts((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
+      setCarts((prev) => {
+        const exists = prev.some((c) => c.id === updated.id);
+        if (!exists) return [...prev, updated];
+        return prev.map((c) => (c.id === updated.id ? updated : c));
+      });
+      setActiveCartId(updated.id);
+      localStorage.setItem(ACTIVE_KEY, updated.id);
       toast.success('Added to cart');
     },
-    [activeCartId, cart?.id]
+    [activeCartId, cart?.id, refresh]
   );
 
   const updateQty = useCallback(
@@ -155,7 +182,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       carts,
       cart: cart ?? emptyCart,
       activeCartId,
-      loading,
+      loading: loading || authLoading,
+      ready,
       itemCount,
       refresh,
       selectCart,
@@ -170,6 +198,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       cart,
       activeCartId,
       loading,
+      authLoading,
+      ready,
       itemCount,
       refresh,
       selectCart,

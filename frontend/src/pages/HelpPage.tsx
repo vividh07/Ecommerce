@@ -327,7 +327,7 @@ export function HelpPage() {
             Subscribe
           </button>
         </form>
-        <p className="mt-3 text-xs text-muted">By subscribing, you agree to receive marketing emails from SHOP.</p>
+        <p className="mt-3 text-xs text-muted">By subscribing, you agree to receive marketing emails from LUMEN.</p>
       </section>
     </div>
   );

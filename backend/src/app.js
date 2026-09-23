@@ -10,6 +10,7 @@ import apiRoutes from './routes/index.js';
 import { webhookController } from './controllers/webhookController.js';
 import { asyncHandler } from './utils/asyncHandler.js';
 import { notFoundHandler, errorHandler } from './middleware/errorHandler.js';
+import { UPLOADS_ROOT } from './middleware/upload.js';
 
 export function createApp() {
   const app = express();
@@ -29,14 +30,16 @@ export function createApp() {
   );
 
   app.post(
-    '/api/webhooks/stripe',
+    '/api/webhooks/razorpay',
     express.raw({ type: 'application/json' }),
-    asyncHandler(webhookController.stripe)
+    asyncHandler(webhookController.razorpay)
   );
 
   app.use(express.json({ limit: '1mb' }));
   app.use(cookieParser());
   app.use(mongoSanitize());
+
+  app.use('/uploads', express.static(UPLOADS_ROOT));
 
   if (env.NODE_ENV !== 'test') {
     app.use(morgan('dev'));
@@ -57,6 +60,8 @@ export function createApp() {
   });
   app.use('/api/auth/login', authLimiter);
   app.use('/api/auth/register', authLimiter);
+  app.use('/api/auth/forgot-password', authLimiter);
+  app.use('/api/auth/reset-password', authLimiter);
 
   app.get('/api/health', (_req, res) => {
     res.json({ success: true, status: 'ok' });

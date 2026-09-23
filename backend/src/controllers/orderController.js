@@ -1,5 +1,6 @@
 import { orderService } from '../services/orderService.js';
 import { orderTrackingService } from '../services/orderTrackingService.js';
+import { returnService } from '../services/returnService.js';
 
 export const orderController = {
   list: async (req, res) => {
@@ -22,5 +23,13 @@ export const orderController = {
       req.validated.note
     );
     res.json({ success: true, data: order });
+  },
+  confirmDelivery: async (req, res) => {
+    const order = await orderTrackingService.confirmDelivery(req.user._id, req.params.orderId);
+    res.json({ success: true, data: order });
+  },
+  requestReturn: async (req, res) => {
+    const data = await returnService.requestReturn(req.user._id, req.params.orderId, req.validated);
+    res.status(201).json({ success: true, data });
   },
 };

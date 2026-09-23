@@ -1,4 +1,4 @@
-/** Format amounts for the SHOP storefront (INR). */
+/** Format amounts for the LUMEN storefront (INR). */
 export function formatINR(amount: number) {
   const n = Number(amount) || 0;
   return `INR ${Math.round(n).toLocaleString('en-IN')}`;

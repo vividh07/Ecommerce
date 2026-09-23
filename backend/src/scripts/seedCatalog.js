@@ -126,13 +126,13 @@ export async function seedCatalog({ clear = false } = {}) {
     });
     const seller = await Seller.create({
       userId: sellerUser._id,
-      storeName: 'SHOP Studio',
+      storeName: 'LUMEN Studio',
       description: 'Curated everyday essentials.',
       isApproved: true,
       onboardingComplete: true,
       onboardingStep: 4,
     });
-    accounts.push({ role: 'SELLER', email: sellerUser.email, storeName: 'SHOP Studio' });
+    accounts.push({ role: 'SELLER', email: sellerUser.email, storeName: 'LUMEN Studio' });
 
     const [tech, fashion, home, beauty, sports] = await Category.create([
       { name: 'Tech' },

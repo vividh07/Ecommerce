@@ -116,7 +116,23 @@ export function OrdersPage() {
       try {
         try {
           const res = await api.get(`/sellers/orders/${selectedId}`);
-          if (!cancelled) setDetail(res.data.data ?? res.data);
+          if (cancelled) return;
+          const data = res.data.data ?? res.data;
+          // API returns { order, history, customer } — flatten for the drawer.
+          if (data?.order) {
+            setDetail({
+              ...data.order,
+              customer: data.customer
+                ? {
+                    name: data.customer.name,
+                    email: data.customer.email,
+                    phone: data.customer.phone,
+                  }
+                : data.order.customer,
+            });
+          } else {
+            setDetail(data);
+          }
           return;
         } catch (err: unknown) {
           const status = (err as { response?: { status?: number } })?.response?.status;
@@ -257,7 +273,7 @@ export function OrdersPage() {
                         }`}
                       >
                         <td className="px-5 py-3.5 font-medium">
-                          #{o.orderNumber ?? o._id.slice(-6).toUpperCase()}
+                          #{o.orderNumber ?? String(o._id).slice(-6).toUpperCase()}
                         </td>
                         <td className="px-5 py-3.5">{o.customer?.name ?? o.shippingAddress?.fullName ?? 'Customer'}</td>
                         <td className="px-5 py-3.5 text-[#6b7280]">{formatShortDate(o.createdAt)}</td>
@@ -290,7 +306,7 @@ export function OrdersPage() {
               <div>
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="text-lg font-semibold">
-                    Order #{detail.orderNumber ?? detail._id.slice(-6).toUpperCase()}
+                    Order #{detail.orderNumber ?? String(detail._id).slice(-6).toUpperCase()}
                   </h3>
                   <SellerPill tone={orderStatusMeta(fulfillmentStatus(detail)).tone}>
                     {orderStatusMeta(fulfillmentStatus(detail)).label}

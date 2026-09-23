@@ -5,7 +5,7 @@ export function NotFoundPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="relative flex min-h-[calc(100vh-200px)] flex-col items-center justify-center overflow-hidden bg-black px-4 py-20 text-center">
+    <div className="relative flex min-h-[calc(100vh-200px)] flex-col items-center justify-center overflow-hidden bg-bg px-4 py-20 text-center">
       <span
         aria-hidden
         className="pointer-events-none absolute inset-0 flex items-center justify-center font-display text-[clamp(10rem,40vw,22rem)] leading-none text-transparent"

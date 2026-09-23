@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { AccountSidebar } from '../../components/layout/AccountSidebar';
 import { Breadcrumbs } from '../../components/layout/ShopNavbar';
 import { IconChevronRight, IconMonitor, IconMoon, IconSun } from '../../components/icons/Icons';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import { api } from '../../lib/api';
 import type { ThemePreference } from '../../lib/theme';
 
 function Toggle({
@@ -41,18 +43,50 @@ const THEME_OPTIONS: {
   Icon: typeof IconSun;
 }[] = [
   { id: 'light', label: 'Light', hint: 'Bright surfaces', Icon: IconSun },
-  { id: 'dark', label: 'Dark', hint: 'Default SHOP look', Icon: IconMoon },
+  { id: 'dark', label: 'Dark', hint: 'Default LUMEN look', Icon: IconMoon },
   { id: 'system', label: 'System', hint: 'Match device', Icon: IconMonitor },
 ];
 
 export function AccountSettingsPage() {
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth();
   const { preference, setPreference } = useTheme();
   const [name, setName] = useState(user?.name ?? '');
-  const [email, setEmail] = useState(user?.email ?? '');
-  const [phone, setPhone] = useState('');
-  const [orderUpdates, setOrderUpdates] = useState(true);
-  const [marketing, setMarketing] = useState(false);
+  const [phoneCode, setPhoneCode] = useState(user?.phoneCountryCode ?? '+91');
+  const [phone, setPhone] = useState(user?.phone ?? '');
+  const [orderUpdates, setOrderUpdates] = useState(user?.notificationPrefs?.orderUpdates !== false);
+  const [marketing, setMarketing] = useState(Boolean(user?.notificationPrefs?.marketing));
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    setName(user.name ?? '');
+    setPhoneCode(user.phoneCountryCode ?? '+91');
+    setPhone(user.phone ?? '');
+    setOrderUpdates(user.notificationPrefs?.orderUpdates !== false);
+    setMarketing(Boolean(user.notificationPrefs?.marketing));
+  }, [user]);
+
+  async function onSave() {
+    if (saving) return;
+    setSaving(true);
+    try {
+      await api.patch('/account/profile', {
+        name: name.trim(),
+        phone: phone.trim(),
+        phoneCountryCode: phoneCode,
+        notificationPrefs: { orderUpdates, marketing },
+      });
+      await refreshProfile();
+      toast.success('Profile saved');
+    } catch (err: unknown) {
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+        'Could not save profile';
+      toast.error(message);
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
     <div className="flex flex-col gap-8 lg:flex-row lg:gap-14">
@@ -80,17 +114,23 @@ export function AccountSettingsPage() {
               <div className="sm:col-span-2">
                 <label className="mb-2 block text-sm text-muted">Email address</label>
                 <input
-                  className="input-field"
+                  className="input-field cursor-not-allowed opacity-70"
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={user?.email ?? ''}
+                  readOnly
                   autoComplete="email"
                 />
+                <p className="mt-1.5 text-xs text-muted">Email can&apos;t be changed here.</p>
               </div>
               <div className="sm:col-span-2">
                 <label className="mb-2 block text-sm text-muted">Phone number (optional)</label>
                 <div className="flex gap-2">
-                  <select className="input-field w-[5.5rem] shrink-0" defaultValue="+91" aria-label="Country code">
+                  <select
+                    className="input-field w-[5.5rem] shrink-0"
+                    value={phoneCode}
+                    onChange={(e) => setPhoneCode(e.target.value)}
+                    aria-label="Country code"
+                  >
                     <option value="+91">+91</option>
                     <option value="+1">+1</option>
                     <option value="+44">+44</option>
@@ -110,9 +150,10 @@ export function AccountSettingsPage() {
               <button
                 type="button"
                 className="btn-primary"
-                onClick={() => toast.success('Profile saved')}
+                disabled={saving}
+                onClick={() => void onSave()}
               >
-                Save changes
+                {saving ? 'Saving…' : 'Save changes'}
               </button>
             </div>
           </section>
@@ -156,10 +197,10 @@ export function AccountSettingsPage() {
                 <h2 className="text-base font-semibold">Password and security</h2>
                 <p className="mt-1 text-sm text-muted">Keep your account secure.</p>
               </div>
-              <button type="button" className="btn-outline">
+              <Link to="/forgot-password" className="btn-outline">
                 Change password
                 <IconChevronRight className="h-4 w-4" />
-              </button>
+              </Link>
             </div>
           </section>
 

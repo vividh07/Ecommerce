@@ -5,6 +5,7 @@ import { sellerRepository } from '../repositories/sellerRepository.js';
 import { aggregateOrderStatus, canAdvanceStatus } from '../utils/orderStatus.js';
 import { getIo } from '../socket/io.js';
 import { applyItemPostPurchaseFields } from '../utils/postPurchase.js';
+import { accountService } from './accountService.js';
 
 async function logStatus(orderId, status, note, sellerId = null, session) {
   return orderStatusHistoryRepository.add(
@@ -81,6 +82,41 @@ export const orderTrackingService = {
       seller._id
     );
 
+    await accountService.pushNotification(order.userId, {
+      title: `Order ${status.replaceAll('_', ' ').toLowerCase()}`,
+      body: note || `${seller.storeName} updated your order.`,
+      href: `/orders/${order._id}`,
+    });
+
+    emitOrderUpdate(order.userId.toString(), order);
+    return order;
+  },
+
+  async confirmDelivery(userId, orderId) {
+    const order = await orderRepository.findById(orderId, userId);
+    if (!order) throw new ApiError(404, 'Order not found');
+    if (order.paymentStatus !== 'PAID') {
+      throw new ApiError(400, 'Only paid orders can be confirmed');
+    }
+    if (order.status === 'DELIVERED') {
+      return order;
+    }
+    if (!['SHIPPED', 'OUT_FOR_DELIVERY'].includes(order.status)) {
+      throw new ApiError(400, 'Confirm delivery after the order has shipped');
+    }
+
+    for (const entry of order.sellerFulfillment ?? []) {
+      if (entry.status !== 'CANCELLED' && entry.status !== 'RETURNED') {
+        entry.status = 'DELIVERED';
+      }
+    }
+    order.status = 'DELIVERED';
+    if (!order.deliveredAt) {
+      await applyItemPostPurchaseFields(order);
+    }
+    await order.save();
+
+    await logStatus(order._id, 'DELIVERED', 'Customer confirmed delivery', null);
     emitOrderUpdate(order.userId.toString(), order);
     return order;
   },

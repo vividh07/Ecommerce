@@ -31,11 +31,20 @@ function orderActions(order: Order) {
     return {
       primary: { to: `/orders/${order._id}`, label: 'Buy again →' },
       secondary: { to: `/account/returns/${order._id}`, label: 'Request return' },
+      confirmDelivery: false,
+    };
+  }
+  if (order.status === 'SHIPPED' || order.status === 'OUT_FOR_DELIVERY') {
+    return {
+      primary: { to: `/orders/${order._id}`, label: 'Track order →' },
+      secondary: { to: `/orders/${order._id}`, label: 'View details' },
+      confirmDelivery: true,
     };
   }
   return {
     primary: { to: `/orders/${order._id}`, label: 'Track order →' },
     secondary: { to: `/orders/${order._id}`, label: 'View details' },
+    confirmDelivery: false,
   };
 }
 
@@ -44,13 +53,30 @@ export function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>('all');
   const [search, setSearch] = useState('');
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
-  useEffect(() => {
-    api
+  function loadOrders() {
+    return api
       .get('/orders')
       .then((res) => setOrders(res.data.items ?? []))
       .finally(() => setLoading(false));
+  }
+
+  useEffect(() => {
+    loadOrders();
   }, []);
+
+  async function confirmDelivery(orderId: string) {
+    setConfirmingId(orderId);
+    try {
+      await api.post(`/orders/${orderId}/confirm-delivery`);
+      await loadOrders();
+    } catch {
+      /* toast optional — detail page has messaging */
+    } finally {
+      setConfirmingId(null);
+    }
+  }
 
   const filtered = useMemo(() => {
     let list = orders;
@@ -165,11 +191,22 @@ export function OrdersPage() {
                     </div>
 
                     <div className="flex flex-col gap-2 sm:flex-row xl:shrink-0 xl:flex-col">
-                      <Link to={actions.primary.to} className="btn-primary text-center text-sm whitespace-nowrap">
-                        {actions.primary.label}
-                      </Link>
+                      {actions.confirmDelivery ? (
+                        <button
+                          type="button"
+                          className="btn-primary text-center text-sm whitespace-nowrap"
+                          disabled={confirmingId === o._id}
+                          onClick={() => confirmDelivery(o._id)}
+                        >
+                          {confirmingId === o._id ? 'Updating…' : 'Mark as delivered'}
+                        </button>
+                      ) : (
+                        <Link to={actions.primary.to} className="btn-primary text-center text-sm whitespace-nowrap">
+                          {actions.primary.label}
+                        </Link>
+                      )}
                       <Link to={actions.secondary.to} className="btn-outline text-center text-sm whitespace-nowrap">
-                        {actions.secondary.label}
+                        {actions.confirmDelivery ? 'Track order →' : actions.secondary.label}
                       </Link>
                     </div>
                   </div>

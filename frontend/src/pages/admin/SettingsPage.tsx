@@ -155,7 +155,7 @@ export function SettingsPage() {
               <h2 className="font-semibold">Store branding</h2>
               <div className="flex flex-wrap items-center gap-4">
                 <div className="flex h-20 w-20 items-center justify-center rounded-[10px] border border-border bg-black font-display text-xl tracking-[0.2em]">
-                  SHOP
+                  LUMEN
                 </div>
                 <button type="button" className="btn-outline text-sm">
                   Upload logo
@@ -163,7 +163,7 @@ export function SettingsPage() {
               </div>
               <p className="text-xs text-muted">A square logo works best. Recommended size 512 x 512px.</p>
               <div className="rounded-[10px] border border-border bg-panel-2 px-6 py-8 text-center font-display text-3xl tracking-[0.35em]">
-                SHOP
+                LUMEN
               </div>
             </section>
           </div>

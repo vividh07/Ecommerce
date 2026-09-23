@@ -1,4 +1,5 @@
 import { sellerService } from '../services/sellerService.js';
+import { returnService } from '../services/returnService.js';
 
 export const sellerController = {
   apply: async (req, res) => {
@@ -28,6 +29,10 @@ export const sellerController = {
   listReturns: async (req, res) => {
     const result = await sellerService.listReturns(req.user._id, req.validated ?? req.query);
     res.json({ success: true, ...result });
+  },
+  approveReturn: async (req, res) => {
+    const data = await returnService.approveReturn(req.user._id, req.params.returnId);
+    res.json({ success: true, data });
   },
   payouts: async (req, res) => {
     const data = await sellerService.getPayouts(req.user._id);

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { Breadcrumbs } from '../components/layout/ShopNavbar';
@@ -22,13 +22,24 @@ function colorOf(attrs: Record<string, string>) {
 }
 
 export function CartPage() {
-  const { cart, loading, updateQty, removeItem, activeCartId, itemCount } = useCart();
+  const { cart, loading, ready, updateQty, removeItem, refresh, itemCount, activeCartId } = useCart();
   const { toggle } = useWishlist();
   const items = cart?.items ?? [];
   const delivery = 0;
   const [promo, setPromo] = useState('');
 
-  if (loading && !cart?.id) return <Skeleton className="mt-8 h-64 w-full" />;
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
+
+  if (!ready || loading) {
+    return (
+      <div className="mt-8 space-y-4">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-64 w-full" />
+      </div>
+    );
+  }
 
   return (
     <div>

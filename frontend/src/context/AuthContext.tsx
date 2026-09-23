@@ -7,8 +7,9 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { api, setTokens } from '../lib/api';
+import { api, clearSession, setTokens } from '../lib/api';
 import { markSkipAuthFrom } from '../lib/authRedirect';
+import { disconnectSocket } from '../lib/socket';
 import type { SellerProfile, User } from '../types';
 
 type AuthState = {
@@ -17,11 +18,20 @@ type AuthState = {
   loading: boolean;
   login: (email: string, password: string) => Promise<User>;
   register: (name: string, email: string, password: string, role?: string) => Promise<User>;
+  loginWithGoogle: (accessToken: string, role?: string) => Promise<User>;
   logout: () => Promise<void>;
-  refreshProfile: () => Promise<void>;
+  refreshProfile: () => Promise<boolean>;
 };
 
 const AuthContext = createContext<AuthState | null>(null);
+
+const BOOTSTRAP_MS = 12_000;
+
+function wipeLocalSession() {
+  clearSession();
+  disconnectSocket();
+  localStorage.removeItem('activeCartId');
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -33,9 +43,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const res = await api.get('/auth/me');
       setUser(res.data.data.user);
       setSeller(res.data.data.seller);
+      return true;
     } catch {
+      wipeLocalSession();
       setUser(null);
       setSeller(null);
+      return false;
     }
   }, []);
 
@@ -45,7 +58,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
       return;
     }
-    refreshProfile().finally(() => setLoading(false));
+
+    let cancelled = false;
+    const timeout = window.setTimeout(() => {
+      if (cancelled) return;
+      // Backend down / hung refresh — drop stale session so the UI can recover.
+      wipeLocalSession();
+      setUser(null);
+      setSeller(null);
+      setLoading(false);
+    }, BOOTSTRAP_MS);
+
+    refreshProfile().finally(() => {
+      if (cancelled) return;
+      window.clearTimeout(timeout);
+      setLoading(false);
+    });
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeout);
+    };
   }, [refreshProfile]);
 
   const login = useCallback(async (email: string, password: string) => {
@@ -69,6 +102,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [refreshProfile]
   );
 
+  const loginWithGoogle = useCallback(
+    async (accessToken: string, role = 'CUSTOMER') => {
+      const res = await api.post('/auth/google', { accessToken, role });
+      const { user: u, accessToken: at, refreshToken } = res.data.data;
+      setTokens(at, refreshToken);
+      setUser(u);
+      const ok = await refreshProfile();
+      if (!ok) setUser(u);
+      return u as User;
+    },
+    [refreshProfile]
+  );
+
   const logout = useCallback(async () => {
     markSkipAuthFrom();
     try {
@@ -76,14 +122,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       /* ignore */
     }
-    setTokens(null, null);
+    wipeLocalSession();
     setUser(null);
     setSeller(null);
   }, []);
 
   const value = useMemo(
-    () => ({ user, seller, loading, login, register, logout, refreshProfile }),
-    [user, seller, loading, login, register, logout, refreshProfile]
+    () => ({ user, seller, loading, login, register, loginWithGoogle, logout, refreshProfile }),
+    [user, seller, loading, login, register, loginWithGoogle, logout, refreshProfile]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

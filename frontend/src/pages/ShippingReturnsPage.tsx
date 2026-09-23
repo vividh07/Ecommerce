@@ -214,7 +214,7 @@ export function ShippingReturnsPage() {
               </p>
               <div className="mt-8 grid gap-4 sm:grid-cols-3">
                 {['1. Request', '2. Send back', '3. Review'].map((label) => (
-                  <div key={label} className="rounded-[12px] border border-border bg-[#111] p-5 text-center">
+                  <div key={label} className="rounded-[12px] border border-border bg-panel p-5 text-center">
                     <p className="font-semibold">{label}</p>
                   </div>
                 ))}
@@ -228,7 +228,7 @@ export function ShippingReturnsPage() {
         </div>
 
         <aside className="space-y-4">
-          <div id="track" className="scroll-mt-28 rounded-[12px] border border-border bg-[#111] p-6">
+          <div id="track" className="scroll-mt-28 rounded-[12px] border border-border bg-panel p-6">
             <h3 className="text-lg font-semibold">Track your order</h3>
             <form onSubmit={trackOrder} className="mt-5 space-y-3">
               <label className="block">
@@ -257,7 +257,7 @@ export function ShippingReturnsPage() {
               </button>
             </form>
             {result && (
-              <div className="mt-5 rounded-[8px] border border-border bg-black/40 p-4 text-sm">
+              <div className="mt-5 rounded-[8px] border border-border bg-panel-2 p-4 text-sm">
                 <p className="font-semibold">{result.orderNumber}</p>
                 <p className="mt-1 text-muted">Status: {result.status}</p>
                 {result.history?.length > 0 && (
@@ -280,7 +280,7 @@ export function ShippingReturnsPage() {
             )}
           </div>
 
-          <div className="overflow-hidden rounded-[12px] border border-border bg-[#111]">
+          <div className="overflow-hidden rounded-[12px] border border-border bg-panel">
             <div className="aspect-[16/10] bg-[#151515]">
               <img
                 src="/images/shop/products/lamp-orange.png"
@@ -301,7 +301,7 @@ export function ShippingReturnsPage() {
             </div>
           </div>
 
-          <div className="rounded-[12px] border border-border bg-[#111] p-6">
+          <div className="rounded-[12px] border border-border bg-panel p-6">
             <IconMessage className="h-5 w-5 text-accent" />
             <p className="mt-3 text-sm text-muted">Still have a question? We&apos;re here to help.</p>
             <Link to="/contact" className="btn-outline mt-4 w-full">

@@ -13,12 +13,16 @@ import adminRoutes from './adminRoutes.js';
 import shoppingRoomRoutes from './shoppingRoomRoutes.js';
 import dashboardRoutes from './dashboardRoutes.js';
 import siteRoutes from './siteRoutes.js';
+import uploadRoutes from './uploadRoutes.js';
+import accountRoutes from './accountRoutes.js';
 
 const router = Router();
 
 router.use('/auth', authRoutes);
+router.use('/account', accountRoutes);
 router.use('/catalog', catalogRoutes);
 router.use('/products', productRoutes);
+router.use('/uploads', uploadRoutes);
 router.use('/', cartRoutes);
 router.use('/wishlist', wishlistRoutes);
 router.use('/coupons', couponRoutes);

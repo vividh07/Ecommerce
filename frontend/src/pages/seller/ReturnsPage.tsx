@@ -20,6 +20,7 @@ import { Skeleton } from '../../components/ui/Skeleton';
 
 type ReturnRow = {
   returnId: string;
+  displayId?: string;
   orderId: string;
   orderNumber?: string;
   productName: string;
@@ -37,8 +38,15 @@ type ReturnRow = {
 
 function statusMeta(status: string) {
   const s = status.toUpperCase();
-  if (s === 'REFUNDED' || s === 'COMPLETED') return { label: 'Refunded', tone: 'success' as const, tab: 'completed' };
-  if (s === 'IN_TRANSIT' || s === 'RETURNED') return { label: 'In transit', tone: 'info' as const, tab: 'transit' };
+  if (s === 'REFUNDED' || s === 'COMPLETED') {
+    return { label: 'Refunded', tone: 'success' as const, tab: 'completed' };
+  }
+  if (s === 'REJECTED') {
+    return { label: 'Rejected', tone: 'danger' as const, tab: 'completed' };
+  }
+  if (s === 'IN_TRANSIT' || s === 'RETURNED' || s === 'APPROVED') {
+    return { label: s === 'APPROVED' ? 'Approved' : 'In transit', tone: 'info' as const, tab: 'transit' };
+  }
   return { label: 'Under review', tone: 'warning' as const, tab: 'review' };
 }
 
@@ -48,6 +56,7 @@ export function ReturnsPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [tab, setTab] = useState('all');
   const [q, setQ] = useState('');
+  const [approving, setApproving] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -72,6 +81,28 @@ export function ReturnsPage() {
       cancelled = true;
     };
   }, []);
+
+  async function approveSelected() {
+    if (!selectedId) return;
+    setApproving(true);
+    try {
+      const res = await api.patch(`/sellers/returns/${selectedId}/approve`);
+      const updated = res.data.data;
+      setItems((prev) =>
+        prev.map((r) =>
+          r.returnId === selectedId ? { ...r, status: updated?.status ?? 'APPROVED' } : r
+        )
+      );
+      toast.success('Return approved');
+    } catch (err: unknown) {
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        'Could not approve return';
+      toast.error(msg);
+    } finally {
+      setApproving(false);
+    }
+  }
 
   const counts = useMemo(() => {
     const review = items.filter((r) => statusMeta(r.status).tab === 'review').length;
@@ -203,7 +234,9 @@ export function ReturnsPage() {
                             </div>
                           </div>
                         </td>
-                        <td className="px-5 py-3.5 font-medium">#{r.returnId}</td>
+                        <td className="px-5 py-3.5 font-medium">
+                          #{r.displayId ?? `RET-${r.returnId.slice(-6).toUpperCase()}`}
+                        </td>
                         <td className="px-5 py-3.5 text-[#6b7280]">#{r.orderNumber ?? r.orderId.slice(-6)}</td>
                         <td className="px-5 py-3.5">{r.customer?.name ?? '—'}</td>
                         <td className="px-5 py-3.5">{r.reason ?? '—'}</td>
@@ -227,7 +260,9 @@ export function ReturnsPage() {
             <div className="flex items-start justify-between gap-2">
               <div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="text-lg font-semibold">Return #{selected.returnId}</h3>
+                  <h3 className="text-lg font-semibold">
+                    Return #{selected.displayId ?? `RET-${selected.returnId.slice(-6).toUpperCase()}`}
+                  </h3>
                   <SellerPill tone={statusMeta(selected.status).tone}>{statusMeta(selected.status).label}</SellerPill>
                 </div>
               </div>
@@ -297,8 +332,16 @@ export function ReturnsPage() {
             </div>
 
             <div className="mt-5 space-y-2">
-              <button type="button" className={sellerBtnPrimary('w-full')}>
-                Approve return
+              <button
+                type="button"
+                className={sellerBtnPrimary('w-full')}
+                disabled={
+                  approving ||
+                  !['REQUESTED', 'UNDER_REVIEW'].includes(selected.status.toUpperCase())
+                }
+                onClick={() => void approveSelected()}
+              >
+                {approving ? 'Approving…' : 'Approve return'}
               </button>
               <button type="button" className={sellerBtnOutline('w-full')}>
                 Request details

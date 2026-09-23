@@ -20,7 +20,7 @@ export function AuthShell({
           to="/browse"
           className="wordmark justify-self-start focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
         >
-          SHOP
+          LUMEN
         </Link>
         <p className="hidden text-center text-[11px] font-medium uppercase tracking-[0.28em] text-muted sm:block">
           Curated for everyday
@@ -65,7 +65,7 @@ export function AuthShell({
       </main>
 
       <footer className="flex shrink-0 items-center justify-between px-5 py-5 text-[11px] uppercase tracking-[0.14em] text-muted md:px-10 lg:px-12">
-        <span>© SHOP 2026</span>
+        <span>© LUMEN 2026</span>
         <nav className="flex items-center gap-2 sm:gap-3">
           <a href="#privacy" className="transition hover:text-text">
             Privacy
@@ -146,11 +146,22 @@ export function AuthDivider({ label }: { label: string }) {
   );
 }
 
-export function GoogleButton({ onClick }: { onClick: () => void }) {
+export function GoogleButton({
+  onClick,
+  disabled,
+}: {
+  onClick: () => void;
+  disabled?: boolean;
+}) {
   return (
-    <button type="button" className="btn-outline w-full gap-3 py-3.5" onClick={onClick}>
+    <button
+      type="button"
+      className="btn-outline w-full gap-3 py-3.5"
+      onClick={onClick}
+      disabled={disabled}
+    >
       <GoogleMark />
-      Continue with Google
+      {disabled ? 'Connecting to Google…' : 'Continue with Google'}
     </button>
   );
 }

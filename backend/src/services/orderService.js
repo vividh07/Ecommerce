@@ -22,7 +22,11 @@ export const orderService = {
     const seller = await sellerRepository.findByUserId(userId);
     if (!seller?.isApproved) throw new ApiError(403, 'Approved seller required');
     const { page, limit, skip } = parsePagination(query);
-    const { items, total } = await orderRepository.listBySeller(seller._id, { skip, limit });
+    const { items, total } = await orderRepository.listBySeller(seller._id, {
+      skip,
+      limit,
+      filter: { paymentStatus: 'PAID' },
+    });
     const filtered = items.map((order) => ({
       ...order.toObject(),
       items: order.items.filter((i) => i.sellerId.toString() === seller._id.toString()),

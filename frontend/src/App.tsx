@@ -20,6 +20,7 @@ import { CartComparePage } from './pages/CartComparePage';
 import { OrdersPage } from './pages/OrdersPage';
 import { LoginPage } from './pages/auth/LoginPage';
 import { RegisterPage } from './pages/auth/RegisterPage';
+import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
 import { ShoppingRoomLobbyPage } from './pages/ShoppingRoomLobbyPage';
 import { ShoppingRoomPage } from './pages/ShoppingRoomPage';
 import { PostPurchaseDashboardPage } from './pages/PostPurchaseDashboardPage';
@@ -75,6 +76,7 @@ export default function App() {
               <Routes>
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
               <Route
                 path="/admin"

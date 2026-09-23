@@ -1,5 +1,6 @@
 import { useAuth } from '../../context/AuthContext';
-import { IconBell, IconChevronDown, IconSearch } from '../icons/Icons';
+import { IconChevronDown, IconSearch } from '../icons/Icons';
+import { NotificationBell } from './NotificationBell';
 
 export function AdminTopBar() {
   const { user } = useAuth();
@@ -20,10 +21,7 @@ export function AdminTopBar() {
         />
       </div>
       <div className="flex items-center gap-3">
-        <button type="button" className="relative rounded-full border border-border p-2.5 text-muted hover:text-text" aria-label="Notifications">
-          <IconBell className="h-4 w-4" />
-          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-[#d4ff3f]" />
-        </button>
+        <NotificationBell variant="admin" />
         <button type="button" className="flex items-center gap-2 rounded-full border border-border py-1.5 pl-1.5 pr-3 text-sm">
           <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#d4ff3f] text-xs font-bold text-accent-fg">
             {initials}

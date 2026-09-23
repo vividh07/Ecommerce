@@ -58,7 +58,7 @@ export function AboutPage() {
   }
 
   return (
-    <div className="bg-black text-text">
+    <div className="bg-bg text-text">
       <div className="relative mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-10">
         <Breadcrumbs items={[{ label: 'HOME', to: '/' }, { label: 'ABOUT' }]} />
         <VerticalLabel text="GOOD THINGS GO FURTHER" />
@@ -67,8 +67,8 @@ export function AboutPage() {
           <h1 className="page-title text-[clamp(2.5rem,6vw,4.5rem)]">
             Good finds. With a little more thought.
           </h1>
-          <p className="mt-5 max-w-xl text-base text-white/80 md:text-lg">
-            SHOP brings everyday essentials together in one considered collection.
+          <p className="mt-5 max-w-xl text-base text-muted md:text-lg">
+            LUMEN brings everyday essentials together in one considered collection.
           </p>
         </div>
 
@@ -88,7 +88,7 @@ export function AboutPage() {
           <h2 className="page-title mt-4 text-[clamp(2rem,4vw,3.25rem)]">Made for the everyday.</h2>
           <div className="mt-6 space-y-4 text-sm leading-relaxed text-muted md:text-base">
             <p>
-              We started SHOP because finding good everyday things should not feel noisy. Too many
+              We started LUMEN because finding good everyday things should not feel noisy. Too many
               choices, too little care — we wanted a quieter place to discover products that earn
               their keep.
             </p>
@@ -117,7 +117,7 @@ export function AboutPage() {
         <p className="eyebrow">Our values</p>
         <div className="mt-8 grid gap-4 md:grid-cols-3">
           {VALUES.map((v) => (
-            <div key={v.title} className="rounded-[12px] border border-border bg-[#111] p-6">
+            <div key={v.title} className="rounded-[12px] border border-border bg-panel p-6">
               <v.icon className="h-6 w-6 text-accent" />
               <h3 className="mt-4 text-lg font-semibold">{v.title}</h3>
               <p className="mt-2 text-sm leading-relaxed text-muted">{v.text}</p>
@@ -135,7 +135,7 @@ export function AboutPage() {
         />
         <div className="absolute inset-0 bg-black/55" />
         <div className="relative z-10 mx-auto flex min-h-[320px] max-w-[1600px] items-center px-4 py-20 sm:px-6 lg:px-10">
-          <p className="max-w-md text-2xl font-semibold leading-snug md:text-3xl">
+          <p className="max-w-md text-2xl font-semibold leading-snug text-white md:text-3xl">
             Everyday essentials for a brighter tomorrow.
           </p>
         </div>

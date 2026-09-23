@@ -34,7 +34,7 @@ export function SellerSidebar({ storeName }: { storeName?: string }) {
     <aside className="flex w-full flex-col border-b border-white/10 bg-[#111111] text-white md:w-60 md:min-h-screen md:border-b-0 md:border-r md:border-white/10">
       <div className="flex items-center justify-between gap-3 px-4 py-5">
         <div>
-          <p className="text-lg font-bold tracking-wide">SHOP</p>
+          <p className="text-lg font-bold tracking-wide">LUMEN</p>
           <p className="text-xs text-white/50">Seller Center</p>
         </div>
         <button

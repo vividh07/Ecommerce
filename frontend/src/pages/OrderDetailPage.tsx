@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { api } from '../lib/api';
 import { formatINR } from '../lib/money';
 import { getSocket } from '../lib/socket';
@@ -51,28 +52,26 @@ export function OrderDetailPage() {
   const [order, setOrder] = useState<Order | null>(null);
   const [history, setHistory] = useState<StatusHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [confirming, setConfirming] = useState(false);
+
+  function reload() {
+    if (!orderId) return Promise.resolve();
+    return api.get(`/orders/${orderId}`).then((res) => {
+      setOrder(res.data.data.order);
+      setHistory(res.data.data.history ?? []);
+    });
+  }
 
   useEffect(() => {
     if (!orderId) return;
-    api
-      .get(`/orders/${orderId}`)
-      .then((res) => {
-        setOrder(res.data.data.order);
-        setHistory(res.data.data.history ?? []);
-      })
-      .finally(() => setLoading(false));
+    reload().finally(() => setLoading(false));
   }, [orderId]);
 
   useEffect(() => {
     const socket = getSocket();
     if (!socket || !orderId) return;
     const handler = (p: { orderId: string }) => {
-      if (p.orderId === orderId) {
-        api.get(`/orders/${orderId}`).then((res) => {
-          setOrder(res.data.data.order);
-          setHistory(res.data.data.history ?? []);
-        });
-      }
+      if (p.orderId === orderId) reload();
     };
     socket.on('order:updated', handler);
     return () => {
@@ -80,14 +79,44 @@ export function OrderDetailPage() {
     };
   }, [orderId]);
 
+  async function confirmDelivery() {
+    if (!orderId) return;
+    setConfirming(true);
+    try {
+      await api.post(`/orders/${orderId}/confirm-delivery`);
+      await reload();
+      toast.success('Marked as delivered');
+    } catch (err: unknown) {
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+        'Could not confirm delivery';
+      toast.error(message);
+    } finally {
+      setConfirming(false);
+    }
+  }
+
   if (loading) return <Skeleton className="h-64 w-full" />;
   if (!order) return <p className="text-muted">Order not found.</p>;
 
+  const canConfirm = ['SHIPPED', 'OUT_FOR_DELIVERY'].includes(order.status);
   const eta = new Date(order.createdAt);
   eta.setDate(eta.getDate() + 4);
   const details = stepDetails(order.createdAt, order.status);
   const trackSteps = trackStepsBase.map((s, i) => ({ ...s, detail: details[i] }));
   const shortId = order._id.slice(-4).toUpperCase();
+  const headline =
+    order.status === 'DELIVERED'
+      ? 'Delivered.'
+      : canConfirm
+        ? 'Almost there.'
+        : 'On its way.';
+  const subline =
+    order.status === 'DELIVERED'
+      ? `Order #${shortId} was delivered.`
+      : canConfirm
+        ? `Order #${shortId} has shipped — confirm when it arrives.`
+        : `Your order #${shortId} is on the move.`;
 
   return (
     <div className="flex flex-col gap-8 lg:flex-row lg:gap-14">
@@ -103,10 +132,18 @@ export function OrderDetailPage() {
 
         <div className="mt-4 flex flex-wrap items-start justify-between gap-6">
           <div>
-            <h1 className="page-title">On its way.</h1>
-            <p className="mt-3 text-sm text-muted">
-              Your order #{shortId} is on the move.
-            </p>
+            <h1 className="page-title">{headline}</h1>
+            <p className="mt-3 text-sm text-muted">{subline}</p>
+            {canConfirm ? (
+              <button
+                type="button"
+                className="btn-primary mt-5"
+                disabled={confirming}
+                onClick={confirmDelivery}
+              >
+                {confirming ? 'Updating…' : 'Mark as delivered'}
+              </button>
+            ) : null}
           </div>
           <div className="hidden text-right text-muted sm:block">
             <IconShippingBox className="ml-auto h-20 w-20 text-white/80" />

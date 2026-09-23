@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
 import { clearSkipAuthFrom } from '../../lib/authRedirect';
@@ -26,7 +26,7 @@ function safeRedirectPath(pathname: string | undefined): string | null {
 }
 
 export function LoginPage() {
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const from = safeRedirectPath(
@@ -37,10 +37,31 @@ export function LoginPage() {
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(() => Boolean(localStorage.getItem('shop.rememberEmail')));
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   useEffect(() => {
     clearSkipAuthFrom();
   }, []);
+
+  async function onGoogle() {
+    setGoogleLoading(true);
+    try {
+      const { requestGoogleAccessToken } = await import('../../lib/googleAuth');
+      const accessToken = await requestGoogleAccessToken();
+      const user = await loginWithGoogle(accessToken, 'CUSTOMER');
+      toast.success('Welcome back');
+      navigate(from ?? homeForRole(user.role), { replace: true });
+    } catch (err: unknown) {
+      const message =
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data
+          ?.message ??
+        (err as { message?: string })?.message ??
+        'Google sign-in failed';
+      toast.error(message);
+    } finally {
+      setGoogleLoading(false);
+    }
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -69,9 +90,7 @@ export function LoginPage() {
       <p className="mt-3 text-[0.95rem] text-muted">Your favourites. Your orders. All right here.</p>
 
       <div className="mt-8 space-y-5">
-        <GoogleButton
-          onClick={() => toast('Google sign-in is not configured yet.')}
-        />
+        <GoogleButton onClick={onGoogle} disabled={googleLoading || loading} />
         <AuthDivider label="Or sign in with email" />
 
         <form onSubmit={onSubmit} className="space-y-5">
@@ -102,13 +121,12 @@ export function LoginPage() {
               />
               Remember me
             </label>
-            <button
-              type="button"
+            <Link
+              to="/forgot-password"
               className="text-muted underline decoration-white/30 underline-offset-4 transition hover:text-text hover:decoration-white"
-              onClick={() => toast('Password reset is coming soon.')}
             >
               Forgot password?
-            </button>
+            </Link>
           </div>
 
           <AuthPrimaryButton loading={loading}>{loading ? 'Signing in…' : 'Sign in'}</AuthPrimaryButton>

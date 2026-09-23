@@ -5,6 +5,12 @@ export type User = {
   name: string;
   email: string;
   role: Role;
+  phone?: string;
+  phoneCountryCode?: string;
+  notificationPrefs?: {
+    orderUpdates: boolean;
+    marketing: boolean;
+  };
 };
 
 export type SellerProfile = {
@@ -134,6 +140,7 @@ export type Order = {
     status: OrderStatus;
   }>;
   items: Array<{
+    variantId: string;
     productName: string;
     variantLabel: string;
     quantity: number;

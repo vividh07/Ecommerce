@@ -12,7 +12,7 @@ import {
 } from './AuthLayout';
 
 export function RegisterPage() {
-  const { register } = useAuth();
+  const { register, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const role = params.get('role') === 'seller' ? 'SELLER' : 'CUSTOMER';
@@ -22,6 +22,31 @@ export function RegisterPage() {
   const [password, setPassword] = useState('');
   const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  async function onGoogle() {
+    if (!agreed) {
+      toast.error('Please agree to the Terms and Privacy Policy');
+      return;
+    }
+    setGoogleLoading(true);
+    try {
+      const { requestGoogleAccessToken } = await import('../../lib/googleAuth');
+      const accessToken = await requestGoogleAccessToken();
+      await loginWithGoogle(accessToken, role);
+      toast.success('Account ready');
+      navigate(role === 'SELLER' ? '/seller' : '/browse', { replace: true });
+    } catch (err: unknown) {
+      const message =
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data
+          ?.message ??
+        (err as { message?: string })?.message ??
+        'Google sign-in failed';
+      toast.error(message);
+    } finally {
+      setGoogleLoading(false);
+    }
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -58,9 +83,7 @@ export function RegisterPage() {
       <p className="mt-3 text-[0.95rem] text-muted">A little account. A world of good finds.</p>
 
       <div className="mt-8 space-y-5">
-        <GoogleButton
-          onClick={() => toast('Google sign-in is not configured yet.')}
-        />
+        <GoogleButton onClick={onGoogle} disabled={googleLoading || loading} />
         <AuthDivider label="Or create an account with email" />
 
         <form onSubmit={onSubmit} className="space-y-5">

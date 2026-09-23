@@ -407,7 +407,7 @@ export function OnboardingPage() {
 
         <SellerCard className="h-fit p-5">
           <p className="text-sm font-semibold">Store preview</p>
-          <p className="mt-1 text-xs text-[#6b7280]">This is how your store could look on SHOP.</p>
+          <p className="mt-1 text-xs text-[#6b7280]">This is how your store could look on LUMEN.</p>
           <div className="mt-4 overflow-hidden rounded-[10px] border border-[#e5e5e5]">
             <div className="h-20 bg-gradient-to-br from-[#e5e5e5] to-[#f5f5f5]">
               {form.coverUrl ? <img src={form.coverUrl} alt="" className="h-full w-full object-cover" /> : null}

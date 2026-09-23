@@ -42,7 +42,13 @@ export const productService = {
     if (!seller) throw new ApiError(403, 'Seller profile required');
     const { page, limit, skip } = parsePagination(query);
     const { items, total } = await productRepository.listBySeller(seller._id, { skip, limit });
-    return { items, meta: paginationMeta({ page, limit, total }) };
+    const withVariants = await Promise.all(
+      items.map(async (p) => {
+        const variants = await variantRepository.listByProduct(p._id);
+        return { ...(p.toObject?.() ?? p), variants };
+      })
+    );
+    return { items: withVariants, meta: paginationMeta({ page, limit, total }) };
   },
 
   async addVariant(userId, productId, data) {

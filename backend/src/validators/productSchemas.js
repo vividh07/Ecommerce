@@ -5,7 +5,12 @@ export const productCreateSchema = z.object({
   categoryId: z.string().min(1),
   description: z.string().max(5000).optional().default(''),
   basePrice: z.coerce.number().min(0),
-  images: z.array(z.string().url()).max(10).optional().default([]),
+  // Allow absolute URLs and site-relative paths (e.g. /images/shop/...)
+  images: z
+    .array(z.string().min(1).max(2048))
+    .max(10)
+    .optional()
+    .default([]),
   isActive: z.boolean().optional().default(true),
 });
 

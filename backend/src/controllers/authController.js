@@ -9,6 +9,10 @@ export const authController = {
     const result = await authService.login(req.validated);
     res.json({ success: true, data: result });
   },
+  google: async (req, res) => {
+    const result = await authService.googleAuth(req.validated);
+    res.json({ success: true, data: result });
+  },
   refresh: async (req, res) => {
     const result = await authService.refresh(req.validated);
     res.json({ success: true, data: result });
@@ -20,5 +24,13 @@ export const authController = {
   me: async (req, res) => {
     const result = await authService.me(req.user._id);
     res.json({ success: true, data: result });
+  },
+  forgotPassword: async (req, res) => {
+    const result = await authService.forgotPassword(req.validated);
+    res.json({ success: true, ...result });
+  },
+  resetPassword: async (req, res) => {
+    const result = await authService.resetPassword(req.validated);
+    res.json({ success: true, ...result });
   },
 };
