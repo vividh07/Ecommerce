@@ -18,7 +18,6 @@ const couponSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-couponSchema.index({ code: 1 });
 couponSchema.index({ sellerId: 1, isActive: 1 });
 
 export const Coupon = mongoose.model('Coupon', couponSchema);

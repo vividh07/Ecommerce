@@ -40,7 +40,6 @@ const shoppingRoomSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-shoppingRoomSchema.index({ roomCode: 1 }, { unique: true });
 shoppingRoomSchema.index({ hostUserId: 1 });
 
 export const ShoppingRoom = mongoose.model('ShoppingRoom', shoppingRoomSchema);

@@ -38,7 +38,6 @@ const sellerSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-sellerSchema.index({ userId: 1 });
 sellerSchema.index({ isApproved: 1, isDeleted: 1 });
 sellerSchema.index({ storeSlug: 1 });
 
